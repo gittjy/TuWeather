@@ -1,0 +1,11 @@
+<litepal>
+    <dbname value="tu_weather_db"/>
+
+    <version value="1"/>
+
+    <list>
+        <mapping class="com.android.tu.tuweather.db.Province"/>
+        <mapping class="com.android.tu.tuweather.db.City"/>
+        <mapping class="com.android.tu.tuweather.db.County"/>
+    </list>
+</litepal>

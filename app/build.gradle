@@ -23,4 +23,8 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:25.1.1'
+    compile 'org.litepal.android:core:1.3.2' //Litepal数据库操作
+    compile 'com.squareup.okhttp3:okhttp:3.4.1' //okhttp网络请求
+    compile 'com.google.code.gson:gson:2.7' //GSON解析JSON
+    compile 'com.github.bumptech.glide:glide:3.7.0' //Glide加载和展示图片
 }
