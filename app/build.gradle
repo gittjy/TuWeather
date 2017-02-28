@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'android-apt'
 
 android {
     compileSdkVersion 25
@@ -27,4 +28,7 @@ dependencies {
     compile 'com.squareup.okhttp3:okhttp:3.4.1' //okhttp网络请求
     compile 'com.google.code.gson:gson:2.7' //GSON解析JSON
     compile 'com.github.bumptech.glide:glide:3.7.0' //Glide加载和展示图片
+
+    compile 'com.jakewharton:butterknife:8.4.0'
+    apt 'com.jakewharton:butterknife-compiler:8.4.0' //ButterKnife
 }
