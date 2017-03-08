@@ -9,31 +9,29 @@
         android:layout_height="match_parent"
         android:scaleType="centerCrop"/>
 
-    <ScrollView
-        android:id="@+id/weather_layout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scrollbars="none"
-        android:overScrollMode="never">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:fitsSystemWindows="true">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:fitsSystemWindows="true">
 
-            <include layout="@layout/title"/>
+                <include layout="@layout/title"/>
+                <include layout="@layout/aqi"/>
 
-            <include layout="@layout/now"/>
+                <include layout="@layout/now"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"/>
 
-            <include layout="@layout/forcast"/>
+                <include layout="@layout/forcast"
+                    android:layout_alignParentBottom="true"
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"/>
 
-            <include layout="@layout/aqi"/>
+            </LinearLayout>
 
-            <include layout="@layout/suggestion"/>
 
-        </LinearLayout>
 
-    </ScrollView>
 
 </FrameLayout>

@@ -29,6 +29,11 @@ dependencies {
     compile 'com.google.code.gson:gson:2.7' //GSON解析JSON
     compile 'com.github.bumptech.glide:glide:3.7.0' //Glide加载和展示图片
 
+    compile 'com.android.support:design:25.1.1'
+    compile 'com.android.support:cardview-v7:25.1.1'
+
+    compile 'com.github.PhilJay:MPAndroidChart:v3.0.0' //chart图表控件
+
     compile 'com.jakewharton:butterknife:8.4.0'
     apt 'com.jakewharton:butterknife-compiler:8.4.0' //ButterKnife
 }
