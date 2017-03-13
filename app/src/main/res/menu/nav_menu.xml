@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_comment"
+            android:icon="@drawable/ic_star_comment"
+            android:title="好评鼓励"
+            android:actionLayout="@layout/title"/>
+        <item
+            android:id="@+id/nav_setting"
+            android:icon="@drawable/ic_settings_white"
+            android:title="设置"/>
+        <item
+            android:id="@+id/nav_about_us"
+            android:icon="@drawable/ic_about_us"
+            android:title="关于我"/>
+    </group>
+
+</menu>

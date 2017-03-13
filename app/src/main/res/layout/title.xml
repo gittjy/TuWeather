@@ -6,27 +6,42 @@
 
     <ImageButton
         android:id="@+id/nav_img_btn"
-        android:layout_width="25dp"
-        android:layout_height="25dp"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
         android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
         android:foregroundGravity="center_vertical"
         android:src="@drawable/ic_list"
         android:background="#0000"
         android:scaleType="centerInside"/>
-
-    <TextView
-        android:id="@+id/city_text"
+    <LinearLayout
+        android:id="@+id/place_linear"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:gravity="center"
         android:layout_centerInParent="true"
-        android:textColor="#fff"
-        android:textSize="20sp"/>
+        android:orientation="horizontal">
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:src="@drawable/ic_place"
+            android:layout_gravity="center_vertical"
+            android:scaleType="centerInside"/>
+        <TextView
+            android:id="@+id/city_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:textColor="#fff"
+            android:textSize="20sp"/>
+    </LinearLayout>
+
+
 
     <ImageButton
         android:id="@+id/update_img_btn"
-        android:layout_width="25dp"
-        android:layout_height="25dp"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
         android:foregroundGravity="center_vertical"

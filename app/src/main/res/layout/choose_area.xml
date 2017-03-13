@@ -3,12 +3,12 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#fff">
+    android:background="#0000">
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary">
+        android:background="@android:color/transparent">
 
         <ImageButton
             android:id="@+id/img_back_btn"
@@ -18,7 +18,7 @@
             android:layout_centerVertical="true"
             android:layout_marginLeft="10dp"
             android:background="@android:color/transparent"
-            android:src="@drawable/ic_back"
+            android:src="@drawable/ic_back_black"
             android:scaleType="centerInside"/>
 
         <TextView
@@ -27,13 +27,16 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:textSize="20sp"
-            android:textColor="@android:color/white"/>
+            android:background="@android:color/transparent"
+            android:textColor="@color/colorGrayText"/>
     </RelativeLayout>
 
     <ListView
         android:id="@+id/area_list"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:divider="@drawable/divider">
     </ListView>
 
 

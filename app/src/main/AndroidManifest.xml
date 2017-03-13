@@ -36,7 +36,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".WeatherActivity" />
+        <activity android:name=".WeatherActivity"/>
+        <activity android:name=".AboutUsActivity"
+            android:label="关于我"/>
 
         <service
             android:name=".service.AutoUpdateService"

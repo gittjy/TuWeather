@@ -1,12 +1,14 @@
 package com.android.tu.tuweather;
 
 import android.app.ProgressDialog;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.DialogFragment;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
@@ -14,6 +16,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.tu.tuweather.adapter.AreaListAdapter;
 import com.android.tu.tuweather.db.City;
 import com.android.tu.tuweather.db.County;
 import com.android.tu.tuweather.db.Province;
@@ -36,7 +39,7 @@ import okhttp3.Response;
 /**
  * Created by tjy on 2017/2/28.
  */
-public class ChooseAreaFragment extends android.support.v4.app.Fragment{
+public class ChooseAreaFragment extends DialogFragment{
 
     public static final int LEVEL_PROVINCE=0;
 
@@ -71,10 +74,10 @@ public class ChooseAreaFragment extends android.support.v4.app.Fragment{
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-
+        getDialog().requestWindowFeature(Window.FEATURE_NO_TITLE);
         View view=inflater.inflate(R.layout.choose_area,container,false);
         ButterKnife.bind(this,view);
-        listAdapter=new ArrayAdapter<>(getContext(),android.R.layout.simple_list_item_1,datalist);
+        listAdapter=new AreaListAdapter(getContext(),R.layout.arealist_item,datalist);
         areaList.setAdapter(listAdapter);
         return view;
     }
@@ -86,6 +89,16 @@ public class ChooseAreaFragment extends android.support.v4.app.Fragment{
         }else if(currentLevel==LEVEL_CITY){
             queryProvince();
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        DisplayMetrics displayMetrics=new DisplayMetrics();
+        getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);//获得屏幕的宽高i
+        int mWidth= displayMetrics.widthPixels;
+        int mHeight=displayMetrics.heightPixels;
+        getDialog().getWindow().setLayout((int)(0.7*mWidth),(int)( 0.6*mHeight));
     }
 
     @Override
@@ -101,11 +114,9 @@ public class ChooseAreaFragment extends android.support.v4.app.Fragment{
                     selectedCity=cityList.get(i);
                     queryCounty();
                 }else if(currentLevel==LEVEL_COUNTY){
-                    Intent intent=new Intent(getActivity(),WeatherActivity.class);
-                    String weatherId=countyList.get(i).getWeatherId();
-                    intent.putExtra("weather_id",weatherId);
-                    startActivity(intent);
-                    getActivity().finish();
+                    WeatherActivity weatherActivity= (WeatherActivity) getActivity();
+                    weatherActivity.requestWeather(countyList.get(i).getCountyName());
+                    weatherActivity.dismissPlaceDialog();
                 }
             }
         });

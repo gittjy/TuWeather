@@ -6,6 +6,35 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:itemTextAppearance">@style/myTextStyle</item>
+    </style>
+
+    <style name="myTextStyle">
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
+    <!--自定义弹窗样式-->
+    <style name="Translucent_dialog" parent="android:Theme.Dialog">
+        <item name="android:windowBackground">@android:color/transparent</item><!--Dialog最外层布局背景-->
+        <item name="android:background">@drawable/aqi_text_back</item>
+        <item name="android:windowFrame">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:topDark">#00000000</item>
+        <item name="android:centerDark">#00000000</item>
+        <item name="android:bottomDark">#00000000</item>
+        <item name="android:windowIsTranslucent">false</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation.Translucent</item>
+    </style>
+
+    <style name="Translucent_white_dialog" parent="android:Theme.Dialog">
+        <item name="android:windowBackground">@android:color/transparent</item><!--Dialog最外层布局背景-->
+        <item name="android:background">@drawable/ic_area_dialog</item>
+        <item name="android:windowFrame">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:topDark">#00000000</item>
+        <item name="android:bottomDark">#00000000</item>
+        <item name="android:windowIsTranslucent">false</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>
     </style>
 
 </resources>
