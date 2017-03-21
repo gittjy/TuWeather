@@ -1,7 +1,9 @@
 package com.android.tu.tuweather;
 
 import android.app.ProgressDialog;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.util.DisplayMetrics;
@@ -19,6 +21,7 @@ import android.widget.Toast;
 import com.android.tu.tuweather.adapter.AreaListAdapter;
 import com.android.tu.tuweather.db.City;
 import com.android.tu.tuweather.db.County;
+import com.android.tu.tuweather.db.Location;
 import com.android.tu.tuweather.db.Province;
 import com.android.tu.tuweather.util.HttpUtil;
 import com.android.tu.tuweather.util.Utility;
@@ -114,8 +117,19 @@ public class ChooseAreaFragment extends DialogFragment{
                     selectedCity=cityList.get(i);
                     queryCounty();
                 }else if(currentLevel==LEVEL_COUNTY){
+                    String selectCounty=countyList.get(i).getCountyName();
+                    Location location=new Location();
+                    location.setUserLocation(selectCounty);
+                    SharedPreferences prefs= PreferenceManager.getDefaultSharedPreferences(getActivity());
+                    String prefsLoc=prefs.getString("bdloc",null);
+                    List<Location> locationList=new ArrayList<>();
+                    locationList=DataSupport.where("userlocation=?",selectCounty).find(Location.class);
+                    //判断添加的地区是否已经在数据库和sharepreference文件中存在，若存在则不重复添加
+                    if(locationList.size()<1&&!selectCounty.equals(prefsLoc)){
+                        location.save();
+                    }
                     WeatherActivity weatherActivity= (WeatherActivity) getActivity();
-                    weatherActivity.requestWeather(countyList.get(i).getCountyName());
+                    weatherActivity.requestWeather(selectCounty);
                     weatherActivity.dismissPlaceDialog();
                 }
             }

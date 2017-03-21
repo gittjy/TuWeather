@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -24,11 +25,16 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.LinearInterpolator;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.tu.tuweather.db.Location;
 import com.android.tu.tuweather.gson.Weather;
 import com.android.tu.tuweather.service.AutoUpdateService;
 import com.android.tu.tuweather.util.HttpUtil;
@@ -37,6 +43,10 @@ import com.baidu.location.BDLocation;
 import com.baidu.location.BDLocationListener;
 import com.baidu.location.LocationClient;
 import com.baidu.location.LocationClientOption;
+import com.baoyz.swipemenulistview.SwipeMenu;
+import com.baoyz.swipemenulistview.SwipeMenuCreator;
+import com.baoyz.swipemenulistview.SwipeMenuItem;
+import com.baoyz.swipemenulistview.SwipeMenuListView;
 import com.bumptech.glide.Glide;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.Entry;
@@ -45,6 +55,8 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.IValueFormatter;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.utils.ViewPortHandler;
+
+import org.litepal.crud.DataSupport;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -159,11 +171,7 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
             progressDialog.show();
         }
         ButterKnife.bind(this);
-        navImageBtn.setOnClickListener(this);
-        updateImageBtn.setOnClickListener(this);
-        placeLinear.setOnClickListener(this);
-        sugImageBtn.setOnClickListener(this);
-        navView.setNavigationItemSelectedListener(this);
+        setOnClickListener();
 
         //refreshSwipe.setColorSchemeResources(R.color.colorPrimary);
         SharedPreferences prefs= PreferenceManager.getDefaultSharedPreferences(this);
@@ -189,13 +197,18 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
             progressDialog.setTitle("天气信息获取...");
             isWait = true;
         }
-        /*refreshSwipe.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                requestWeather(weatherId);
-            }
-        });*/
 
+    }
+
+    /**
+     * 注册所有必要的点击事件
+     */
+    private void setOnClickListener() {
+        navImageBtn.setOnClickListener(this);
+        updateImageBtn.setOnClickListener(this);
+        placeLinear.setOnClickListener(this);
+        sugImageBtn.setOnClickListener(this);
+        navView.setNavigationItemSelectedListener(this);
     }
 
     private void getBDLocation() {
@@ -233,11 +246,12 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
 
     /**
      * 请求天气数据
-     * @param weatherId
+     * @param mWeatherId
      */
-    public void requestWeather(String weatherId) {
+    public void requestWeather(String mWeatherId) {
+        weatherId=mWeatherId;
         loadImage();
-        String weatherUrl="https://free-api.heweather.com/v5/weather?city="+weatherId+"&key=1c3dd6a908d1467dbb730e3e6aaffcb6";
+        String weatherUrl="https://free-api.heweather.com/v5/weather?city="+mWeatherId+"&key=1c3dd6a908d1467dbb730e3e6aaffcb6";
         HttpUtil.sendOkhttpRequest(weatherUrl, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -286,10 +300,10 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
         String weatherInfo=weather.now.more.info;
         cityText.setText(cityName);
         timeText.setText(updateTime);
-        if(weather.aqi.city.aqi!=null){
+        if(weather.aqi!=null){
             aqiText.setText(weather.aqi.city.aqi+"   "+weather.aqi.city.qlty);
         }else{
-            aqiText.setText("无数据");
+            aqiText.setText("本地无数据");
         }
         degreeText.setText(degree);
         String imageUrl="http://files.heweather.com/cond_icon/"+weather.now.more.code+".png";
@@ -522,11 +536,89 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
         }
     }
 
+    private void showPlaceDialog() {
+        final Dialog dialog=new Dialog(WeatherActivity.this,R.style.Translucent_white_dialog);
+        View view=LayoutInflater.from(WeatherActivity.this).inflate(R.layout.added_area_layout,null);
+        RelativeLayout locTextLayout= (RelativeLayout) view.findViewById(R.id.loc_text_layout);
+        TextView locTextView= (TextView) view.findViewById(R.id.loc_textview);
+        SharedPreferences prefs=PreferenceManager.getDefaultSharedPreferences(WeatherActivity.this);
+        String locName=prefs.getString("bdloc",null);
+        if(locName!=null){
+            locTextView.setText(locName);
+        }
+        SwipeMenuListView placeListView= (SwipeMenuListView) view.findViewById(R.id.added_area_listview);
+        //构造listview的滑动出现的按钮
+        SwipeMenuCreator creator=new SwipeMenuCreator() {
+            @Override
+            public void create(SwipeMenu menu) {
+                SwipeMenuItem swipeMenuItem=new SwipeMenuItem(WeatherActivity.this);
+                swipeMenuItem.setBackground(new ColorDrawable(Color.RED));
+                swipeMenuItem.setTitle("删除");
+                swipeMenuItem.setTitleColor(Color.WHITE);
+                swipeMenuItem.setTitleSize(12);
+                swipeMenuItem.setWidth(dp2px(50));
+                menu.addMenuItem(swipeMenuItem);
+            }
+        };
+        placeListView.setMenuCreator(creator);
+        ImageButton addImgBtn= (ImageButton) view.findViewById(R.id.add_image_btn);
+        addImgBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showSelectPlaceDialog();
+                dialog.dismiss();
+            }
+        });
+        final ArrayList<String> addedAreaList=new ArrayList<>();
+        ArrayList<Location> locationList= (ArrayList<Location>) DataSupport.findAll(Location.class);
+        if(locationList.size()>0){
+            for(Location mLocation:locationList){
+                addedAreaList.add(mLocation.getUserLocation());
+            }
+        }
+        //AddedAreaListAdapter mAdapter=new AddedAreaListAdapter(WeatherActivity.this,R.layout.added_area_item,addedAreaList);
+        final ArrayAdapter<String> mAdapter=new ArrayAdapter<String>(WeatherActivity.this,android.R.layout.simple_list_item_1,addedAreaList);
+        placeListView.setAdapter(mAdapter);
+        placeListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                weatherId=addedAreaList.get(i);
+                requestWeather(weatherId);
+                dialog.dismiss();
+            }
+        });
+        placeListView.setOnMenuItemClickListener(new SwipeMenuListView.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(int position, SwipeMenu menu, int index) {
+                switch (index){
+                    case 0:
+                        DataSupport.deleteAll(Location.class,"userlocation=?",addedAreaList.get(position));
+                        addedAreaList.remove(position);
+                        mAdapter.notifyDataSetChanged();
+                        break;
+                }
+                return false;
+            }
+        });
+        locTextLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                SharedPreferences prefs=PreferenceManager.getDefaultSharedPreferences(WeatherActivity.this);
+                weatherId=prefs.getString("bdloc",null);
+                requestWeather(weatherId);
+                dialog.dismiss();
+            }
+
+        });
+        dialog.setContentView(view);
+        dialog.show();
+    }
+
     /**
      * 显示生活信息的弹窗
      */
     private void showSugDialog() {
-        View view=LayoutInflater.from(WeatherActivity.this).inflate(R.layout.suggestion,null);//加载布局
+        View view=LayoutInflater.from(WeatherActivity.this).inflate(R.layout.sug_dialog_layout,null);//加载布局
         TextView comfortText= (TextView) view.findViewById(R.id.comfort_text);
         TextView carWashText= (TextView) view.findViewById(R.id.car_wash_text);
         TextView sportText= (TextView) view.findViewById(R.id.sport_text);
@@ -550,7 +642,7 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
     /**
      * 显示地区选择的Dialog
      */
-    private void showPlaceDialog() {
+    private void showSelectPlaceDialog() {
         chooseAreaFragment = new ChooseAreaFragment(); //dialogfragment实例
         chooseAreaFragment.setCancelable(true);
         chooseAreaFragment.setStyle(DialogFragment.STYLE_NO_TITLE,R.style.Translucent_white_dialog);
@@ -574,10 +666,12 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
             case R.id.nav_comment:
                 break;
             case R.id.nav_setting:
+                Intent intentSetting=new Intent(WeatherActivity.this,SettingActivity.class);
+                startActivity(intentSetting);
                 break;
             case R.id.nav_about_us:
-                Intent intent=new Intent(WeatherActivity.this,AboutUsActivity.class);
-                startActivity(intent);
+                Intent intentAbout=new Intent(WeatherActivity.this,AboutUsActivity.class);
+                startActivity(intentAbout);
                 break;
         }
         navDrawer.closeDrawers();
@@ -607,6 +701,11 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
         public void onConnectHotSpotMessage(String s, int i) {
 
         }
+    }
+
+    public int dp2px(float dipValue) {
+        final float scale = this.getResources().getDisplayMetrics().density;
+        return (int) (dipValue * scale + 0.5f);
     }
 
 }

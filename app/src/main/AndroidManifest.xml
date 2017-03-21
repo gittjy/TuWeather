@@ -38,7 +38,8 @@
         </activity>
         <activity android:name=".WeatherActivity"/>
         <activity android:name=".AboutUsActivity"
-            android:label="关于我"/>
+            android:theme="@style/AboutUsActivityTheme" />
+        <activity android:name=".SettingActivity"/>
 
         <service
             android:name=".service.AutoUpdateService"

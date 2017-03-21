@@ -9,6 +9,8 @@
         <item name="android:itemTextAppearance">@style/myTextStyle</item>
     </style>
 
+    <style name="AboutUsActivityTheme" parent="AppTheme"></style>
+
     <style name="myTextStyle">
         <item name="android:textColor">@android:color/white</item>
     </style>
@@ -26,6 +28,7 @@
         <item name="android:windowAnimationStyle">@android:style/Animation.Translucent</item>
     </style>
 
+    <!--白色透明背景-->
     <style name="Translucent_white_dialog" parent="android:Theme.Dialog">
         <item name="android:windowBackground">@android:color/transparent</item><!--Dialog最外层布局背景-->
         <item name="android:background">@drawable/ic_area_dialog</item>

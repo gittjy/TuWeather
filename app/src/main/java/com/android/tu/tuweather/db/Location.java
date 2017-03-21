@@ -11,9 +11,6 @@ public class Location extends DataSupport{
 
     private String userLocation;
 
-    private String weatherId;
-
-    private int isLocate;
 
     public int getId() {
         return id;
@@ -31,19 +28,4 @@ public class Location extends DataSupport{
         this.userLocation = userLocation;
     }
 
-    public String getWeatherId() {
-        return weatherId;
-    }
-
-    public void setWeatherId(String weatherId) {
-        this.weatherId = weatherId;
-    }
-
-    public int isLocate() {
-        return isLocate;
-    }
-
-    public void setLocate(int locate) {
-        isLocate = locate;
-    }
 }

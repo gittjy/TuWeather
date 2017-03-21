@@ -34,6 +34,10 @@ dependencies {
 
     compile 'com.github.PhilJay:MPAndroidChart:v3.0.0' //chart图表控件
 
+    compile 'com.kyleduo.switchbutton:library:1.4.5'
+    compile 'com.github.mcxtzhang:SwipeDelMenuLayout:V1.2.5'//滑动删除控件(拦截了没有点击事件)
+    compile 'com.baoyz.swipemenulistview:library:1.3.0'//可侧滑的listview
+
     compile 'com.jakewharton:butterknife:8.4.0'
     apt 'com.jakewharton:butterknife-compiler:8.4.0' //ButterKnife
 }
