@@ -11,6 +11,16 @@ public class Location extends DataSupport{
 
     private String userLocation;
 
+    public String getLocweatherid() {
+        return locweatherid;
+    }
+
+    public void setLocweatherid(String locweatherid) {
+        this.locweatherid = locweatherid;
+    }
+
+    private String locweatherid;
+
 
     public int getId() {
         return id;

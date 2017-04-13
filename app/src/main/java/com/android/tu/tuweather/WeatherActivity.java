@@ -19,6 +19,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -27,6 +28,7 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.LinearInterpolator;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -36,7 +38,6 @@ import android.widget.Toast;
 
 import com.android.tu.tuweather.db.Location;
 import com.android.tu.tuweather.gson.Weather;
-import com.android.tu.tuweather.service.AutoUpdateService;
 import com.android.tu.tuweather.util.HttpUtil;
 import com.android.tu.tuweather.util.Utility;
 import com.baidu.location.BDLocation;
@@ -55,6 +56,7 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.IValueFormatter;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.utils.ViewPortHandler;
+import com.lusfold.spinnerloading.SpinnerLoading;
 
 import org.litepal.crud.DataSupport;
 
@@ -77,6 +79,13 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
     SwipeRefreshLayout refreshSwipe;*/
     /*@BindView(R.id.weather_layout)
     BounceScrollView weatherLayout;*/
+    @BindView(R.id.load_frame)
+    FrameLayout loadFrameLayout;
+    @BindView(R.id.load_image)
+    ImageView loadImage;
+    @BindView(R.id.weather_main_frame)
+    FrameLayout mainFrameLayout;
+
     @BindView(R.id.city_text)
     TextView cityText;
     @BindView(R.id.aqi_text)
@@ -135,6 +144,7 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
     private Weather currentWeather;
     private Dialog placeDialog;
     private ChooseAreaFragment chooseAreaFragment;
+    private SpinnerLoading spiLoadView;
 
 
     @Override
@@ -149,6 +159,11 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
         mLocationClient = new LocationClient(getApplicationContext());
         mLocationClient.registerLocationListener(new MyLocationListener());
         setContentView(R.layout.activity_weather);
+        ButterKnife.bind(this);
+
+        mainFrameLayout.setVisibility(View.GONE);
+        //Glide.with(this).load(R.mipmap.mountain).into(loadImage);
+        loadFrameLayout.setVisibility(View.VISIBLE);
         List<String> permissionList=new ArrayList<>();
         if(ContextCompat.checkSelfPermission(WeatherActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION)!= PackageManager
                 .PERMISSION_GRANTED){
@@ -167,17 +182,18 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
             ActivityCompat.requestPermissions(WeatherActivity.this,permissions,1);
         }else{
             getBDLocation();
-            progressDialog = new ProgressDialog(WeatherActivity.this);
-            progressDialog.show();
+            spiLoadView = (SpinnerLoading) findViewById(R.id.spi_load);
+            spiLoadView.setPaintMode(1);
+            spiLoadView.setCircleRadius(10);
+            spiLoadView.setItemCount(8);
+            spiLoadView.setVisibility(View.VISIBLE);
         }
-        ButterKnife.bind(this);
         setOnClickListener();
-
         //refreshSwipe.setColorSchemeResources(R.color.colorPrimary);
         SharedPreferences prefs= PreferenceManager.getDefaultSharedPreferences(this);
         String bingPic=prefs.getString("bing_pic",null);
         if(bingPic!=null){
-            Glide.with(this).load(R.mipmap.italy).into(backImage);
+            Glide.with(this).load(R.mipmap.storm).into(backImage);
         }else{
             loadImage();
         }
@@ -194,7 +210,6 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
             requestWeather(bdLoc);
             weatherId =bdLoc;
         }else{
-            progressDialog.setTitle("天气信息获取...");
             isWait = true;
         }
 
@@ -260,6 +275,7 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
                     @Override
                     public void run() {
                         Toast.makeText(WeatherActivity.this,"获取天气信息失败",Toast.LENGTH_SHORT).show();
+                        updateImageBtn.clearAnimation();
                        // refreshSwipe.setRefreshing(false);
                     }
                 });
@@ -269,6 +285,7 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
             public void onResponse(Call call, Response response) throws IOException {
 
                 final String responseText=response.body().string();
+                Log.d("Weather",responseText);
                 final Weather weather=Utility.handleWeatherResponse(responseText);
                 runOnUiThread(new Runnable() {
                     @Override
@@ -281,6 +298,7 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
                             updateImageBtn.clearAnimation();
                         }else {
                             Toast.makeText(WeatherActivity.this,"获取天气信息失败",Toast.LENGTH_SHORT).show();
+                            updateImageBtn.clearAnimation();
                         }
                         //refreshSwipe.setRefreshing(false);
                     }
@@ -411,9 +429,10 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
             }
 
         }
+        loadFrameLayout.setVisibility(View.GONE);
+        mainFrameLayout.setVisibility(View.VISIBLE);
         generateLineChart(maxTempList,minTempList);
-        Intent intent=new Intent(WeatherActivity.this, AutoUpdateService.class);
-        startService(intent);
+        spiLoadView.setVisibility(View.GONE);
     }
 
     /**
@@ -570,10 +589,12 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
             }
         });
         final ArrayList<String> addedAreaList=new ArrayList<>();
+        final ArrayList<String> addedWeatherIdList=new ArrayList<>();
         ArrayList<Location> locationList= (ArrayList<Location>) DataSupport.findAll(Location.class);
         if(locationList.size()>0){
             for(Location mLocation:locationList){
                 addedAreaList.add(mLocation.getUserLocation());
+                addedWeatherIdList.add(mLocation.getLocweatherid());
             }
         }
         //AddedAreaListAdapter mAdapter=new AddedAreaListAdapter(WeatherActivity.this,R.layout.added_area_item,addedAreaList);
@@ -582,7 +603,7 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
         placeListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                weatherId=addedAreaList.get(i);
+                weatherId=addedWeatherIdList.get(i);
                 requestWeather(weatherId);
                 dialog.dismiss();
             }
@@ -629,6 +650,8 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
         }
         Dialog dialog=new Dialog(WeatherActivity.this,R.style.Translucent_dialog);
         dialog.setContentView(view);
+       /* Window window=dialog.getWindow();
+        window.setGravity(Gravity.BOTTOM);*/
         dialog.show();
         //控制dialog的位置在底部
        /* Window window=dialog.getWindow();
@@ -682,7 +705,8 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
     private class MyLocationListener implements BDLocationListener {
         @Override
         public void onReceiveLocation(BDLocation bdLocation) {
-            progressDialog.dismiss();
+            //progressDialog.dismiss();
+
             isLocatedFlag=true;
             String county=bdLocation.getDistrict();
             String tempCounty=county.substring(0,county.length()-1);
@@ -706,6 +730,7 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
     public int dp2px(float dipValue) {
         final float scale = this.getResources().getDisplayMetrics().density;
         return (int) (dipValue * scale + 0.5f);
+
     }
 
 }

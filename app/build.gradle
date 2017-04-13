@@ -40,4 +40,8 @@ dependencies {
 
     compile 'com.jakewharton:butterknife:8.4.0'
     apt 'com.jakewharton:butterknife-compiler:8.4.0' //ButterKnife
+
+    compile 'com.github.gittjy:NormalTopBar:v1.0.1'
+
+    compile 'com.lusfold.spinnerloading:library:1.0.0'
 }

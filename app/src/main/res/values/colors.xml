@@ -3,7 +3,8 @@
     <color name="colorPrimary">#196B69</color>
     <color name="colorPrimaryDark">#196B69</color>
     <color name="colorAccent">#196B69</color>
-    <color name="colorAlphaBlack">#A000</color>
-    <color name="colorAlphaWhite">#8FFF</color>
+    <color name="colorAlphaGreen">#AA004d40</color>
+    <color name="colorAlphaWhite">#80FFFFFF</color>
     <color name="colorGrayText">#202020</color>
+    <color name="colorAlphaBlack">#A000</color>
 </resources>

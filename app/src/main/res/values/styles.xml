@@ -25,7 +25,7 @@
         <item name="android:centerDark">#00000000</item>
         <item name="android:bottomDark">#00000000</item>
         <item name="android:windowIsTranslucent">false</item>
-        <item name="android:windowAnimationStyle">@android:style/Animation.Translucent</item>
+        <item name="android:activityCloseExitAnimation">@anim/dialog_scale_exit</item>
     </style>
 
     <!--白色透明背景-->
@@ -38,6 +38,14 @@
         <item name="android:bottomDark">#00000000</item>
         <item name="android:windowIsTranslucent">false</item>
         <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>
+    </style>
+
+    <style name="sug_dialog_text">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">10sp</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:layout_marginTop">5dp</item>
     </style>
 
 </resources>

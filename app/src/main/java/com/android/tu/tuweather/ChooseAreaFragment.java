@@ -120,6 +120,7 @@ public class ChooseAreaFragment extends DialogFragment{
                     String selectCounty=countyList.get(i).getCountyName();
                     Location location=new Location();
                     location.setUserLocation(selectCounty);
+                    location.setLocweatherid(countyList.get(i).getWeatherId());
                     SharedPreferences prefs= PreferenceManager.getDefaultSharedPreferences(getActivity());
                     String prefsLoc=prefs.getString("bdloc",null);
                     List<Location> locationList=new ArrayList<>();
@@ -129,7 +130,7 @@ public class ChooseAreaFragment extends DialogFragment{
                         location.save();
                     }
                     WeatherActivity weatherActivity= (WeatherActivity) getActivity();
-                    weatherActivity.requestWeather(selectCounty);
+                    weatherActivity.requestWeather(countyList.get(i).getWeatherId());
                     weatherActivity.dismissPlaceDialog();
                 }
             }

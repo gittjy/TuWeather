@@ -39,8 +39,8 @@ public class AboutUsActivity extends AppCompatActivity{
         if(actionBar!=null){
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
-        collpasingToolbar.setTitle("关于我");
-        aboutText.setText(generateText());
+        collpasingToolbar.setTitle("关于");
+        //aboutText.setText(generateText());
         Glide.with(this).load(R.mipmap.wallhaven).into(aboutImage);
     }
 
@@ -57,6 +57,7 @@ public class AboutUsActivity extends AppCompatActivity{
         switch (item.getItemId()){
             case android.R.id.home:
                 finish();
+                overridePendingTransition(R.anim.in_left,R.anim.out_right);
                 break;
         }
         return super.onOptionsItemSelected(item);

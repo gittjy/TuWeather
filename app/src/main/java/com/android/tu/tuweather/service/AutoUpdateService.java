@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import com.android.tu.tuweather.gson.Weather;
 import com.android.tu.tuweather.util.HttpUtil;
@@ -21,6 +22,8 @@ import okhttp3.Response;
 
 public class AutoUpdateService extends Service {
 
+    private static final String SERVICE_TAG="AUTO_SERVICE";
+
     private static final int TIME_INTERVAL=60*60*1000;
 
     public AutoUpdateService() {
@@ -33,7 +36,14 @@ public class AutoUpdateService extends Service {
     }
 
     @Override
+    public void onCreate() {
+        super.onCreate();
+        Log.d(SERVICE_TAG,"Create");
+    }
+
+    @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.d(SERVICE_TAG,"StartCommand");
         updateWeather();
         updateBingPic();
         AlarmManager manager= (AlarmManager) getSystemService(ALARM_SERVICE);
@@ -66,6 +76,7 @@ public class AutoUpdateService extends Service {
                         SharedPreferences.Editor editor=PreferenceManager.getDefaultSharedPreferences(AutoUpdateService.this).edit();
                         editor.putString("weather",responseText);
                         editor.apply();
+                        Log.d("Service_Result",weatherResponse.basic.update.updateTime);
                     }
 
                 }
@@ -91,5 +102,11 @@ public class AutoUpdateService extends Service {
                 }
             }
         });
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.d(SERVICE_TAG,"Destroy");
     }
 }
