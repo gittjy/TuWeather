@@ -14,13 +14,9 @@
         <FrameLayout
             android:id="@+id/load_frame"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
-            <ImageView
-                android:id="@+id/load_image"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:src="@mipmap/mountain"
-                android:scaleType="centerCrop"/>
+            android:layout_height="match_parent"
+            android:background="@android:color/holo_blue_bright">
+
         </FrameLayout>
         <FrameLayout
             android:id="@+id/weather_main_frame"
@@ -74,7 +70,8 @@
             android:background="#00000000"
             android:layout_width="wrap_content"
             android:layout_centerInParent="true"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:visibility="gone"/>
 
     </RelativeLayout>
 

@@ -81,8 +81,6 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
     BounceScrollView weatherLayout;*/
     @BindView(R.id.load_frame)
     FrameLayout loadFrameLayout;
-    @BindView(R.id.load_image)
-    ImageView loadImage;
     @BindView(R.id.weather_main_frame)
     FrameLayout mainFrameLayout;
 
@@ -182,14 +180,13 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
             ActivityCompat.requestPermissions(WeatherActivity.this,permissions,1);
         }else{
             getBDLocation();
-            spiLoadView = (SpinnerLoading) findViewById(R.id.spi_load);
+            /*spiLoadView = (SpinnerLoading) findViewById(R.id.spi_load);
             spiLoadView.setPaintMode(1);
             spiLoadView.setCircleRadius(10);
             spiLoadView.setItemCount(8);
-            spiLoadView.setVisibility(View.VISIBLE);
+            spiLoadView.setVisibility(View.VISIBLE);*/
         }
         setOnClickListener();
-        //refreshSwipe.setColorSchemeResources(R.color.colorPrimary);
         SharedPreferences prefs= PreferenceManager.getDefaultSharedPreferences(this);
         String bingPic=prefs.getString("bing_pic",null);
         if(bingPic!=null){
@@ -197,8 +194,6 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
         }else{
             loadImage();
         }
-
-        //while (!isLocatedFlag){}
         String weatherString=prefs.getString("weather",null);
         String bdLoc=prefs.getString("bdloc",null);
         if(weatherString!=null){
@@ -252,7 +247,7 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Glide.with(WeatherActivity.this).load(bingPic).into(backImage);
+                        Glide.with(WeatherActivity.this).load(R.mipmap.storm).into(backImage);
                     }
                 });
             }
@@ -432,7 +427,7 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
         loadFrameLayout.setVisibility(View.GONE);
         mainFrameLayout.setVisibility(View.VISIBLE);
         generateLineChart(maxTempList,minTempList);
-        spiLoadView.setVisibility(View.GONE);
+        //spiLoadView.setVisibility(View.GONE);
     }
 
     /**

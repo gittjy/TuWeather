@@ -49,8 +49,8 @@
                     android:layout_marginTop="10dp"
                     android:layout_marginBottom="10dp"
                     android:gravity="center_vertical"
-                    app:kswThumbHeight="30dp"
-                    app:kswThumbWidth="30dp"
+                    app:kswThumbHeight="20dp"
+                    app:kswThumbWidth="20dp"
                     app:kswThumbColor="#fff"
                     app:kswBackColor="@drawable/switch_back"/>
 
@@ -107,8 +107,8 @@
                 android:layout_marginTop="10dp"
                 android:layout_marginBottom="10dp"
                 android:gravity="center_vertical"
-                app:kswThumbHeight="30dp"
-                app:kswThumbWidth="30dp"
+                app:kswThumbHeight="20dp"
+                app:kswThumbWidth="20dp"
                 app:kswThumbColor="#fff"
                 app:kswBackColor="@drawable/switch_back"/>
 
