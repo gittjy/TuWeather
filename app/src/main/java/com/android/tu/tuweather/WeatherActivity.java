@@ -56,13 +56,13 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.IValueFormatter;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.utils.ViewPortHandler;
-import com.lusfold.spinnerloading.SpinnerLoading;
 
 import org.litepal.crud.DataSupport;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -74,6 +74,9 @@ import okhttp3.Response;
  * Created by tjy on 2017/3/1.
  */
 public class WeatherActivity extends AppCompatActivity implements View.OnClickListener,NavigationView.OnNavigationItemSelectedListener{
+
+
+    private static final String WEATHER_TAG="Weather_Activity";
 
     /*@BindView(R.id.refresh_swipe)
     SwipeRefreshLayout refreshSwipe;*/
@@ -142,7 +145,9 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
     private Weather currentWeather;
     private Dialog placeDialog;
     private ChooseAreaFragment chooseAreaFragment;
-    private SpinnerLoading spiLoadView;
+
+    private int[] imageIds={R.mipmap.bg_1,R.mipmap.bg_2,R.mipmap.bg_3,R.mipmap.bg_4,R.mipmap.bg_5,
+            R.mipmap.bg_6,R.mipmap.bg_7,R.mipmap.bg_8};
 
 
     @Override
@@ -180,20 +185,10 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
             ActivityCompat.requestPermissions(WeatherActivity.this,permissions,1);
         }else{
             getBDLocation();
-            /*spiLoadView = (SpinnerLoading) findViewById(R.id.spi_load);
-            spiLoadView.setPaintMode(1);
-            spiLoadView.setCircleRadius(10);
-            spiLoadView.setItemCount(8);
-            spiLoadView.setVisibility(View.VISIBLE);*/
         }
         setOnClickListener();
+        setBackImage();
         SharedPreferences prefs= PreferenceManager.getDefaultSharedPreferences(this);
-        String bingPic=prefs.getString("bing_pic",null);
-        if(bingPic!=null){
-            Glide.with(this).load(R.mipmap.storm).into(backImage);
-        }else{
-            loadImage();
-        }
         String weatherString=prefs.getString("weather",null);
         String bdLoc=prefs.getString("bdloc",null);
         if(weatherString!=null){
@@ -207,7 +202,37 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
         }else{
             isWait = true;
         }
+    }
 
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        setBackImage();
+    }
+
+    private void setBackImage() {
+        SharedPreferences prefs= PreferenceManager.getDefaultSharedPreferences(this);
+        boolean isAlbum=prefs.getBoolean("isAlbum",false);
+        if(isAlbum){
+            String imagePath=prefs.getString("imageUri",null);
+            Glide.with(this).load(imagePath).into(backImage);
+        }else{
+            int number=new Random().nextInt(8);
+            Glide.with(this).load(imageIds[number]).into(backImage);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode){
+            case 1:
+                if(grantResults.length>0&&grantResults[0]==PackageManager.PERMISSION_GRANTED){
+                    getBDLocation();
+                }else{
+                    finish();
+                }
+        }
     }
 
     /**
@@ -229,7 +254,7 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
         mLocationClient.start();
     }
 
-    private void loadImage() {
+    /*private void loadImage() {
         final String imgUrl="http://guolin.tech/api/bing_pic";
         HttpUtil.sendOkhttpRequest(imgUrl, new Callback() {
             @Override
@@ -247,12 +272,12 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Glide.with(WeatherActivity.this).load(R.mipmap.storm).into(backImage);
+                        Glide.with(WeatherActivity.this).load(R.mipmap.bg_6).into(backImage);
                     }
                 });
             }
         });
-    }
+    }*/
 
     /**
      * 请求天气数据
@@ -260,8 +285,9 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
      */
     public void requestWeather(String mWeatherId) {
         weatherId=mWeatherId;
-        loadImage();
-        String weatherUrl="https://free-api.heweather.com/v5/weather?city="+mWeatherId+"&key=1c3dd6a908d1467dbb730e3e6aaffcb6";
+        //loadImage();
+        final String weatherUrl="https://free-api.heweather.com/v5/weather?city="+mWeatherId+"&key=1c3dd6a908d1467dbb730e3e6aaffcb6";
+        Log.d(WEATHER_TAG,weatherUrl);
         HttpUtil.sendOkhttpRequest(weatherUrl, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -306,6 +332,7 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
      * 展示天气信息
      */
     private void showWeatherInfo(Weather weather) {
+        updateBackImage();
         currentWeather=weather;
         String cityName=weather.basic.cityName;
         String updateTime=dateStringUtility(weather.basic.update.updateTime);
@@ -427,8 +454,18 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
         loadFrameLayout.setVisibility(View.GONE);
         mainFrameLayout.setVisibility(View.VISIBLE);
         generateLineChart(maxTempList,minTempList);
-        //spiLoadView.setVisibility(View.GONE);
     }
+
+    private void updateBackImage() {
+        SharedPreferences prefs= PreferenceManager.getDefaultSharedPreferences(this);
+        boolean isAlbum=prefs.getBoolean("isAlbum",false);
+        if(!isAlbum){
+            int number=new Random().nextInt(8);
+            Glide.with(this).load(imageIds[number]).into(backImage);
+        }
+
+    }
+
 
     /**
      * 接收到的日期格式处理

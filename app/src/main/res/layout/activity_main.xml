@@ -12,7 +12,7 @@
         <ImageView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:src="@mipmap/timg"
+            android:src="@mipmap/bg_7"
             android:scaleType="centerCrop"
             android:fitsSystemWindows="true"/>
 
