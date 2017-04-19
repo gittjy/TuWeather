@@ -128,7 +128,7 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
     private void showChooseDialog() {
         bgSetDialog = new Dialog(mContext, R.style.BottomDialogStyle);
         //填充对话框的布局
-       View view = LayoutInflater.from(mContext).inflate(R.layout.bg_set_dialog, null);
+        View view = LayoutInflater.from(mContext).inflate(R.layout.bg_set_dialog, null);
         //初始化控件
         TextView fromAlbum = (TextView) view.findViewById(R.id.from_album_text);
         TextView fromSystem = (TextView) view.findViewById(R.id.from_system_text);
@@ -139,7 +139,7 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
         //获取当前Activity所在的窗体
         Window dialogWindow = bgSetDialog.getWindow();
         //设置Dialog从窗体底部弹出
-        dialogWindow.setGravity( Gravity.BOTTOM);
+        dialogWindow.setGravity(Gravity.BOTTOM);
         //获得窗体的属性
         WindowManager.LayoutParams lp = dialogWindow.getAttributes();
         lp.width = (int) (getScreenWidth()*0.95);

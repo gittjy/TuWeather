@@ -46,4 +46,8 @@ dependencies {
     compile 'com.lusfold.spinnerloading:library:1.0.0'
 
     compile 'com.github.GrenderG:Toasty:1.1.5'
+
+    compile 'com.zaaach:citypicker:1.1'//城市选择
+
+    compile 'liji.library.dev:citypickerview:1.0.0'//城市选择三级联动
 }

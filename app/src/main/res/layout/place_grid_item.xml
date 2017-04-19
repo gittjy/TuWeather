@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@android:color/transparent">
+
+    <LinearLayout
+        android:id="@+id/place_info_linear"
+        android:layout_width="match_parent"
+        android:layout_height="125dp"
+        android:layout_margin="10dp"
+        android:orientation="vertical"
+        android:background="@color/colorAlphaGreen"
+        android:gravity="center">
+
+        <TextView
+            android:id="@+id/place_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:textSize="20sp"
+            android:textColor="@android:color/white"
+            android:gravity="center"/>
+
+        <TextView
+            android:id="@+id/place_weather"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:gravity="center"
+            android:textColor="@android:color/white"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/add_image"
+        android:layout_width="match_parent"
+        android:layout_height="125dp"
+        android:layout_margin="10dp"
+        android:gravity="center"
+        android:background="@color/colorAlphaGreen">
+        <ImageView
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:src="@drawable/ic_add"/>
+
+    </LinearLayout>
+
+
+</LinearLayout>

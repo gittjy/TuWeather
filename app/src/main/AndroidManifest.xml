@@ -28,6 +28,8 @@
         <meta-data
             android:name="com.baidu.lbsapi.API_KEY"
             android:value="Mow8jXkBoPy4KD8WIZghqDN1By7ySTiU"/>
+        <meta-data android:name="com.amap.api.v2.apikey" android:value="34d044c178c23ee1f0b5250bcf908b3a"/>
+
 
         <activity android:name=".MainActivity"
                   android:theme="@style/SplashTheme">
@@ -41,14 +43,21 @@
         <activity android:name=".AboutUsActivity"
             android:theme="@style/AboutUsActivityTheme" />
         <activity android:name=".SettingActivity"/>
+        <activity android:name=".PlaceSelectActivity"/>
+        <activity
+            android:name="com.zaaach.citypicker.CityPickerActivity"
+            android:theme="@style/CityPicker.NoActionBar"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|adjustPan"/>
 
         <service
             android:name=".service.AutoUpdateService"
             android:enabled="true"
-            android:exported="true"></service>
+            android:exported="true"/>
         <service android:name="com.baidu.location.f"
             android:enabled="true"
-            android:process=":remote"></service>
+            android:process=":remote"/>
+        <service android:name="com.amap.api.location.APSService"/>
     </application>
 
 </manifest>

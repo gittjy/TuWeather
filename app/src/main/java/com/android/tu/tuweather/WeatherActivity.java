@@ -23,6 +23,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.LinearInterpolator;
@@ -39,6 +41,7 @@ import android.widget.Toast;
 import com.android.tu.tuweather.db.Location;
 import com.android.tu.tuweather.gson.Weather;
 import com.android.tu.tuweather.util.HttpUtil;
+import com.android.tu.tuweather.util.ScreenSizeUtil;
 import com.android.tu.tuweather.util.Utility;
 import com.baidu.location.BDLocation;
 import com.baidu.location.BDLocationListener;
@@ -56,6 +59,7 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.IValueFormatter;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.utils.ViewPortHandler;
+import com.lljjcoder.citypickerview.widget.CityPicker;
 
 import org.litepal.crud.DataSupport;
 
@@ -78,12 +82,16 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
 
     private static final String WEATHER_TAG="Weather_Activity";
 
+    private static final int REQUEST_CODE_PICK_CITY = 0;
+
     /*@BindView(R.id.refresh_swipe)
     SwipeRefreshLayout refreshSwipe;*/
     /*@BindView(R.id.weather_layout)
     BounceScrollView weatherLayout;*/
     @BindView(R.id.load_frame)
     FrameLayout loadFrameLayout;
+    @BindView(R.id.place_fragment_frame)
+    FrameLayout placeFragmentFrame;
     @BindView(R.id.weather_main_frame)
     FrameLayout mainFrameLayout;
 
@@ -207,7 +215,7 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
     @Override
     protected void onRestart() {
         super.onRestart();
-        setBackImage();
+        //setBackImage();
     }
 
     private void setBackImage() {
@@ -218,6 +226,7 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
             Glide.with(this).load(imagePath).into(backImage);
         }else{
             int number=new Random().nextInt(8);
+            Log.d("number",String.valueOf(number));
             Glide.with(this).load(imageIds[number]).into(backImage);
         }
     }
@@ -574,7 +583,15 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
                 requestWeather(weatherId);
                 break;
             case R.id.place_linear:
-                showPlaceDialog();
+                //showPlaceDialog();
+                /*FragmentManager fragmentManager=getSupportFragmentManager();
+                FragmentTransaction fragmentTransaction=fragmentManager.beginTransaction();
+                fragmentTransaction.add(R.id.place_fragment_frame,new PlaceSelectFragment());
+                fragmentTransaction.commit();
+                placeFragmentFrame.setVisibility(View.VISIBLE);
+                mainFrameLayout.setVisibility(View.GONE);*/
+                Intent intent=new Intent(WeatherActivity.this,PlaceSelectActivity.class);
+                startActivity(intent);
                 break;
             case R.id.sug_image:
                 showSugDialog();
@@ -616,7 +633,10 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
         addImgBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                showSelectPlaceDialog();
+                //showSelectPlaceDialog();
+                /*startActivityForResult(new Intent(WeatherActivity.this, CityPickerActivity.class),
+                        REQUEST_CODE_PICK_CITY);*/
+                showCityPicker();
                 dialog.dismiss();
             }
         });
@@ -626,7 +646,6 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
         if(locationList.size()>0){
             for(Location mLocation:locationList){
                 addedAreaList.add(mLocation.getUserLocation());
-                addedWeatherIdList.add(mLocation.getLocweatherid());
             }
         }
         //AddedAreaListAdapter mAdapter=new AddedAreaListAdapter(WeatherActivity.this,R.layout.added_area_item,addedAreaList);
@@ -635,7 +654,7 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
         placeListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                weatherId=addedWeatherIdList.get(i);
+                weatherId=addedAreaList.get(i);
                 requestWeather(weatherId);
                 dialog.dismiss();
             }
@@ -664,7 +683,59 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
 
         });
         dialog.setContentView(view);
+        Window dialogWindow=dialog.getWindow();
+        WindowManager.LayoutParams lp=dialogWindow.getAttributes();
+        lp.height= (int) (ScreenSizeUtil.getScreenHeight(WeatherActivity.this)*0.5);
+        dialogWindow.setAttributes(lp);
         dialog.show();
+    }
+
+    private void showCityPicker() {
+        CityPicker cityPicker = new CityPicker.Builder(WeatherActivity.this)
+                .textSize(20)
+                .title("地址选择")
+                .backgroundPop(0x000000000)
+                .titleBackgroundColor("#ffffff")
+                .titleTextColor("#000000")
+                .backgroundPop(0xa0000000)
+                .confirTextColor("#000000")
+                .cancelTextColor("#000000")
+                .province("北京")
+                .city("北京市")
+                .district("海淀区")
+                .textColor(Color.parseColor("#000000"))
+                .provinceCyclic(true)
+                .cityCyclic(false)
+                .districtCyclic(false)
+                .visibleItemsCount(7)
+                .itemPadding(10)
+                .onlyShowProvinceAndCity(false)
+                .build();
+        cityPicker.show();
+
+        //监听方法，获取选择结果
+        cityPicker.setOnCityItemClickListener(new CityPicker.OnCityItemClickListener() {
+            @Override
+            public void onSelected(String... citySelected) {
+                String selectCounty = citySelected[2].substring(0,citySelected[2].length()-1);
+                Location location=new Location();
+                location.setUserLocation(selectCounty);
+                SharedPreferences prefs= PreferenceManager.getDefaultSharedPreferences(WeatherActivity.this);
+                String prefsLoc=prefs.getString("bdloc",null);
+                List<Location> locationList=new ArrayList<>();
+                locationList=DataSupport.where("userlocation=?",selectCounty).find(Location.class);
+                //判断添加的地区是否已经在数据库和sharepreference文件中存在，若存在则不重复添加
+                if(locationList.size()<1&&!selectCounty.equals(prefsLoc)){
+                    location.save();
+                }
+                requestWeather(selectCounty);
+            }
+
+            @Override
+            public void onCancel() {
+                Toast.makeText(WeatherActivity.this, "已取消", Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     /**

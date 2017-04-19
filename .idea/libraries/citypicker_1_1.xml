@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="citypicker-1.1">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/app/build/intermediates/exploded-aar/com.zaaach/citypicker/1.1/jars/classes.jar!/" />
+      <root url="jar://$PROJECT_DIR$/app/build/intermediates/exploded-aar/com.zaaach/citypicker/1.1/jars/libs/AMap_Location_V3.2.0_20161205.jar!/" />
+      <root url="file://$PROJECT_DIR$/app/build/intermediates/exploded-aar/com.zaaach/citypicker/1.1/res" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.zaaach/citypicker/1.1/ae988845122939a28f2033981bbdb3ffb2a60e72/citypicker-1.1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
