@@ -1,5 +1,7 @@
 package com.android.tu.tuweather;
 
+import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
@@ -24,6 +26,7 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import cn.pedant.SweetAlert.SweetAlertDialog;
 
 /**
  * Created by tjy on 2017/4/19.
@@ -34,6 +37,8 @@ public class PlaceSelectActivity extends AppCompatActivity{
     RecyclerView placeRecyclerView;
 
     List<PlaceItem> placeItemList=new ArrayList<>();
+    private Context mContext;
+    private PlaceGridAdapter placeGridAdapter;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -46,14 +51,50 @@ public class PlaceSelectActivity extends AppCompatActivity{
         }
         setContentView(R.layout.place_select_layout);
         ButterKnife.bind(this);
+        mContext=this;
         initData();
         GridLayoutManager gridLayoutManager=new GridLayoutManager(this,3);
         placeRecyclerView.setLayoutManager(gridLayoutManager);
-        PlaceGridAdapter placeGridAdapter=new PlaceGridAdapter(placeItemList);
+        placeGridAdapter = new PlaceGridAdapter(placeItemList);
         placeGridAdapter.setmPlaceItemClickListener(new PlaceGridAdapter.placeItemClickListener() {
             @Override
             public void itemClick(int pos) {
+                Intent intent=new Intent();
+                intent.putExtra("place_name",placeItemList.get(pos).getPlaceName());
+                setResult(RESULT_OK,intent);
+                finish();
+                if(Build.VERSION.SDK_INT<23){
+                    overridePendingTransition(R.anim.in_left,R.anim.out_right);
+                }
+            }
 
+            @Override
+            public void itemLongClick(final int pos) {
+                if(pos!=0){
+                    SweetAlertDialog sweetAlertDialog=new SweetAlertDialog(mContext,SweetAlertDialog.WARNING_TYPE)
+                            .setTitleText("是否删除选中区域")
+                            .showContentText(false)
+                            .setConfirmText("是")
+                            .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                                @Override
+                                public void onClick(SweetAlertDialog sweetAlertDialog) {
+                                    DataSupport.deleteAll(Location.class,"otherplace=?",placeItemList.get(pos).getPlaceName());
+                                    placeItemList.remove(pos);
+                                    placeGridAdapter.notifyItemRemoved(pos);
+                                    sweetAlertDialog.dismiss();
+                                }
+                            });
+                    sweetAlertDialog.setCanceledOnTouchOutside(true);
+                    sweetAlertDialog.show();
+                }
+                else{
+                    SweetAlertDialog sweetAlertDialog=new SweetAlertDialog(mContext,SweetAlertDialog.ERROR_TYPE)
+                            .setTitleText("定位区域不可删除!")
+                            .showContentText(false)
+                            .setConfirmText("知道了")
+                            .setConfirmClickListener(null);
+                    sweetAlertDialog.show();
+                }
             }
         });
         placeGridAdapter.setmAddItemClickListener(new PlaceGridAdapter.addItemClickListener() {
@@ -62,7 +103,6 @@ public class PlaceSelectActivity extends AppCompatActivity{
                 showCityPicker();
             }
         });
-
         placeRecyclerView.setAdapter(placeGridAdapter);
     }
 
@@ -92,17 +132,22 @@ public class PlaceSelectActivity extends AppCompatActivity{
         cityPicker.setOnCityItemClickListener(new CityPicker.OnCityItemClickListener() {
             @Override
             public void onSelected(String... citySelected) {
+                String selectProvince=citySelected[0];
                 String selectCounty = citySelected[2].substring(0,citySelected[2].length()-1);
                 Location location=new Location();
-                location.setUserLocation(selectCounty);
+                location.setOtherPlace(selectCounty);
+                location.setProvinceName(selectProvince);
                 SharedPreferences prefs= PreferenceManager.getDefaultSharedPreferences(PlaceSelectActivity.this);
                 String prefsLoc=prefs.getString("bdloc",null);
                 List<Location> locationList=new ArrayList<>();
-                locationList= DataSupport.where("userlocation=?",selectCounty).find(Location.class);
+                locationList= DataSupport.where("otherplace=?",selectCounty).find(Location.class);
                 //判断添加的地区是否已经在数据库和sharepreference文件中存在，若存在则不重复添加
                 if(locationList.size()<1&&!selectCounty.equals(prefsLoc)){
                     location.save();
+                    placeItemList.add(placeItemList.size()-1,new PlaceItem(selectCounty,selectProvince));
+                    placeGridAdapter.notifyItemInserted(placeItemList.size()-2);
                 }
+
                 //requestWeather(selectCounty);
             }
 
@@ -114,12 +159,16 @@ public class PlaceSelectActivity extends AppCompatActivity{
     }
 
     private void initData() {
-        placeItemList.add(new PlaceItem("海淀","晴"));
-        placeItemList.add(new PlaceItem("巴东","晴"));
-        placeItemList.add(new PlaceItem("哈尔滨","多云"));
-        placeItemList.add(new PlaceItem("广州","小雨"));
-        placeItemList.add(new PlaceItem("武汉","晴"));
-        placeItemList.add(new PlaceItem("深圳","晴"));
+        SharedPreferences prefs=PreferenceManager.getDefaultSharedPreferences(mContext);
+        String locPlaceName=prefs.getString("bdloc","null");
+        placeItemList.add(new PlaceItem(locPlaceName,""));
+        ArrayList<Location> locationList= (ArrayList<Location>) DataSupport.findAll(Location.class);
+        if(locationList.size()>0){
+            for (int i = 0; i <locationList.size() ; i++) {
+                placeItemList.add(new PlaceItem(locationList.get(i).getOtherPlace(),locationList.get(i).getProvinceName()));
+            }
+        }
+        placeItemList.add(new PlaceItem("",""));
     }
 
 }

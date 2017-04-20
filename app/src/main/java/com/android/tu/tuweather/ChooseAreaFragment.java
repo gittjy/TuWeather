@@ -119,7 +119,7 @@ public class ChooseAreaFragment extends DialogFragment{
                 }else if(currentLevel==LEVEL_COUNTY){
                     String selectCounty=countyList.get(i).getCountyName();
                     Location location=new Location();
-                    location.setUserLocation(selectCounty);
+                    location.setOtherPlace(selectCounty);
                     location.setLocweatherid(countyList.get(i).getWeatherId());
                     SharedPreferences prefs= PreferenceManager.getDefaultSharedPreferences(getActivity());
                     String prefsLoc=prefs.getString("bdloc",null);

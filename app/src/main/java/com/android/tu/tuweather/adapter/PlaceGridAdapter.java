@@ -4,16 +4,14 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.tu.tuweather.R;
 import com.android.tu.tuweather.model.PlaceItem;
 
 import java.util.List;
-
-import es.dmoral.toasty.Toasty;
 
 /**
  * Created by tjy on 2017/4/18.
@@ -46,6 +44,8 @@ public class PlaceGridAdapter extends RecyclerView.Adapter<PlaceGridAdapter.View
 
         LinearLayout imageLinear;
 
+        ImageView locImage;
+
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -53,6 +53,7 @@ public class PlaceGridAdapter extends RecyclerView.Adapter<PlaceGridAdapter.View
             placeWeather= (TextView) itemView.findViewById(R.id.place_weather);
             placeInfoLinear= (LinearLayout) itemView.findViewById(R.id.place_info_linear);
             imageLinear= (LinearLayout) itemView.findViewById(R.id.add_image);
+            locImage= (ImageView) itemView.findViewById(R.id.place_loc_image);
         }
     }
 
@@ -71,7 +72,6 @@ public class PlaceGridAdapter extends RecyclerView.Adapter<PlaceGridAdapter.View
                 int pos=viewHolder.getAdapterPosition();
                 if(pos!=placeItemList.size()-1){
                     mPlaceItemClickListener.itemClick(pos);
-                    Toasty.success(view.getContext(),"success", Toast.LENGTH_SHORT).show();
                 }
 
             }
@@ -86,6 +86,14 @@ public class PlaceGridAdapter extends RecyclerView.Adapter<PlaceGridAdapter.View
 
             }
         });
+        viewHolder.placeInfoLinear.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                int pos=viewHolder.getAdapterPosition();
+                mPlaceItemClickListener.itemLongClick(pos);
+                return false;
+            }
+        });
         return viewHolder;
     }
 
@@ -93,6 +101,13 @@ public class PlaceGridAdapter extends RecyclerView.Adapter<PlaceGridAdapter.View
     public void onBindViewHolder(ViewHolder holder, int position) {
 
         if(position!=placeItemList.size()-1){
+            if(position==0){
+                holder.locImage.setVisibility(View.VISIBLE);
+                holder.placeWeather.setVisibility(View.GONE);
+            }else{
+                holder.locImage.setVisibility(View.GONE);
+                holder.placeWeather.setVisibility(View.VISIBLE);
+            }
             PlaceItem placeItem=placeItemList.get(position);
             holder.placeName.setText(placeItem.getPlaceName());
             holder.placeWeather.setText(placeItem.getPlaceWeather());
@@ -110,10 +125,20 @@ public class PlaceGridAdapter extends RecyclerView.Adapter<PlaceGridAdapter.View
         return placeItemList.size();
     }
 
+    /**
+     * 区域item的点击事件接口
+     */
+
     public interface placeItemClickListener{
+
         void itemClick(int pos);
+
+        void itemLongClick(int pos);
     }
 
+    /**
+     * 添加item的点击事件接口
+     */
     public interface  addItemClickListener{
         void itemClick(int pos);
     }

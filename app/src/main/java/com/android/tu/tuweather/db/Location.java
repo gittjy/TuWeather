@@ -9,15 +9,10 @@ public class Location extends DataSupport{
 
     private int id;
 
-    private String userLocation;
+    private String otherPlace;
 
-    public String getLocweatherid() {
-        return locweatherid;
-    }
 
-    public void setLocweatherid(String locweatherid) {
-        this.locweatherid = locweatherid;
-    }
+    private String provinceName;
 
     private String locweatherid;
 
@@ -30,12 +25,28 @@ public class Location extends DataSupport{
         this.id = id;
     }
 
-    public String getUserLocation() {
-        return userLocation;
+    public String getOtherPlace() {
+        return otherPlace;
     }
 
-    public void setUserLocation(String userLocation) {
-        this.userLocation = userLocation;
+    public void setOtherPlace(String otherPlace) {
+        this.otherPlace = otherPlace;
+    }
+
+    public String getProvinceName() {
+        return provinceName;
+    }
+
+    public void setProvinceName(String provinceName) {
+        this.provinceName = provinceName;
+    }
+
+    public String getLocweatherid() {
+        return locweatherid;
+    }
+
+    public void setLocweatherid(String locweatherid) {
+        this.locweatherid = locweatherid;
     }
 
 }

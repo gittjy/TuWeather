@@ -2,11 +2,11 @@ package com.android.tu.tuweather;
 
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -28,17 +28,13 @@ import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.LinearInterpolator;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.tu.tuweather.db.Location;
+import com.android.tu.tuweather.gson.Suggestion;
 import com.android.tu.tuweather.gson.Weather;
 import com.android.tu.tuweather.util.HttpUtil;
 import com.android.tu.tuweather.util.ScreenSizeUtil;
@@ -47,10 +43,6 @@ import com.baidu.location.BDLocation;
 import com.baidu.location.BDLocationListener;
 import com.baidu.location.LocationClient;
 import com.baidu.location.LocationClientOption;
-import com.baoyz.swipemenulistview.SwipeMenu;
-import com.baoyz.swipemenulistview.SwipeMenuCreator;
-import com.baoyz.swipemenulistview.SwipeMenuItem;
-import com.baoyz.swipemenulistview.SwipeMenuListView;
 import com.bumptech.glide.Glide;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.Entry;
@@ -59,9 +51,6 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.IValueFormatter;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.utils.ViewPortHandler;
-import com.lljjcoder.citypickerview.widget.CityPicker;
-
-import org.litepal.crud.DataSupport;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -70,6 +59,7 @@ import java.util.Random;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import es.dmoral.toasty.Toasty;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
@@ -140,6 +130,8 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
     @BindView(R.id.sug_image)
     ImageView sugImageBtn;
 
+    private Context mContext;
+
     private LocationClient mLocationClient;
 
     private boolean isLocatedFlag=false; //是否定位成功的标志
@@ -171,20 +163,20 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
         mLocationClient.registerLocationListener(new MyLocationListener());
         setContentView(R.layout.activity_weather);
         ButterKnife.bind(this);
-
+        mContext=this;
         mainFrameLayout.setVisibility(View.GONE);
         //Glide.with(this).load(R.mipmap.mountain).into(loadImage);
         loadFrameLayout.setVisibility(View.VISIBLE);
         List<String> permissionList=new ArrayList<>();
-        if(ContextCompat.checkSelfPermission(WeatherActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION)!= PackageManager
+        if(ContextCompat.checkSelfPermission(mContext, android.Manifest.permission.ACCESS_FINE_LOCATION)!= PackageManager
                 .PERMISSION_GRANTED){
             permissionList.add(android.Manifest.permission.ACCESS_FINE_LOCATION);
         }
-        if(ContextCompat.checkSelfPermission(WeatherActivity.this, android.Manifest.permission.READ_PHONE_STATE)!=PackageManager
+        if(ContextCompat.checkSelfPermission(mContext, android.Manifest.permission.READ_PHONE_STATE)!=PackageManager
                 .PERMISSION_GRANTED){
             permissionList.add(android.Manifest.permission.READ_PHONE_STATE);
         }
-        if(ContextCompat.checkSelfPermission(WeatherActivity.this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)!=PackageManager
+        if(ContextCompat.checkSelfPermission(mContext, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)!=PackageManager
                 .PERMISSION_GRANTED){
             permissionList.add(android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
         }
@@ -216,6 +208,7 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
     protected void onRestart() {
         super.onRestart();
         //setBackImage();
+        //requestWeather(weatherId);
     }
 
     private void setBackImage() {
@@ -304,7 +297,7 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Toast.makeText(WeatherActivity.this,"获取天气信息失败",Toast.LENGTH_SHORT).show();
+                        Toasty.warning(mContext,"获取天气信息失败",Toast.LENGTH_SHORT).show();
                         updateImageBtn.clearAnimation();
                        // refreshSwipe.setRefreshing(false);
                     }
@@ -321,13 +314,14 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
                     @Override
                     public void run() {
                         if(weather!=null&&weather.status.equals("ok")){
-                            SharedPreferences.Editor editor=PreferenceManager.getDefaultSharedPreferences(WeatherActivity.this).edit();
+                            SharedPreferences.Editor editor=PreferenceManager.getDefaultSharedPreferences(mContext).edit();
                             editor.putString("weather",responseText);
                             editor.apply();
                             showWeatherInfo(weather);
                             updateImageBtn.clearAnimation();
+                            Toasty.success(mContext,"更新成功",Toast.LENGTH_SHORT).show();
                         }else {
-                            Toast.makeText(WeatherActivity.this,"获取天气信息失败",Toast.LENGTH_SHORT).show();
+                            Toasty.warning(mContext,"获取天气信息失败",Toast.LENGTH_SHORT).show();
                             updateImageBtn.clearAnimation();
                         }
                         //refreshSwipe.setRefreshing(false);
@@ -341,7 +335,7 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
      * 展示天气信息
      */
     private void showWeatherInfo(Weather weather) {
-        updateBackImage();
+        setBackImage();
         currentWeather=weather;
         String cityName=weather.basic.cityName;
         String updateTime=dateStringUtility(weather.basic.update.updateTime);
@@ -355,8 +349,14 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
             aqiText.setText("本地无数据");
         }
         degreeText.setText(degree);
-        String imageUrl="http://files.heweather.com/cond_icon/"+weather.now.more.code+".png";
-        Glide.with(WeatherActivity.this).load(imageUrl).into(condImage);
+        /*String imageUrl="http://files.heweather.com/cond_icon/"+weather.now.more.code+".png";
+        Glide.with(mContext).load(imageUrl).into(condImage);*/
+        if(weatherInfo.equals("雷阵雨伴有冰雹")){
+            weatherInfo="雷阵雨";
+        }
+        if(weatherInfo.equals("毛毛雨/细雨")){
+            weatherInfo="毛毛雨";
+        }
         weatherInfoText.setText(weatherInfo);
         removeLayoutView();
         maxTempList.clear();
@@ -583,15 +583,11 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
                 requestWeather(weatherId);
                 break;
             case R.id.place_linear:
-                //showPlaceDialog();
-                /*FragmentManager fragmentManager=getSupportFragmentManager();
-                FragmentTransaction fragmentTransaction=fragmentManager.beginTransaction();
-                fragmentTransaction.add(R.id.place_fragment_frame,new PlaceSelectFragment());
-                fragmentTransaction.commit();
-                placeFragmentFrame.setVisibility(View.VISIBLE);
-                mainFrameLayout.setVisibility(View.GONE);*/
                 Intent intent=new Intent(WeatherActivity.this,PlaceSelectActivity.class);
-                startActivity(intent);
+                startActivityForResult(intent,1);
+                if(Build.VERSION.SDK_INT<23){
+                    overridePendingTransition(R.anim.in_right,R.anim.out_left);
+                }
                 break;
             case R.id.sug_image:
                 showSugDialog();
@@ -604,165 +600,52 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
         }
     }
 
-    private void showPlaceDialog() {
-        final Dialog dialog=new Dialog(WeatherActivity.this,R.style.Translucent_white_dialog);
-        View view=LayoutInflater.from(WeatherActivity.this).inflate(R.layout.added_area_layout,null);
-        RelativeLayout locTextLayout= (RelativeLayout) view.findViewById(R.id.loc_text_layout);
-        TextView locTextView= (TextView) view.findViewById(R.id.loc_textview);
-        SharedPreferences prefs=PreferenceManager.getDefaultSharedPreferences(WeatherActivity.this);
-        String locName=prefs.getString("bdloc",null);
-        if(locName!=null){
-            locTextView.setText(locName);
-        }
-        SwipeMenuListView placeListView= (SwipeMenuListView) view.findViewById(R.id.added_area_listview);
-        //构造listview的滑动出现的按钮
-        SwipeMenuCreator creator=new SwipeMenuCreator() {
-            @Override
-            public void create(SwipeMenu menu) {
-                SwipeMenuItem swipeMenuItem=new SwipeMenuItem(WeatherActivity.this);
-                swipeMenuItem.setBackground(new ColorDrawable(Color.RED));
-                swipeMenuItem.setTitle("删除");
-                swipeMenuItem.setTitleColor(Color.WHITE);
-                swipeMenuItem.setTitleSize(12);
-                swipeMenuItem.setWidth(dp2px(50));
-                menu.addMenuItem(swipeMenuItem);
-            }
-        };
-        placeListView.setMenuCreator(creator);
-        ImageButton addImgBtn= (ImageButton) view.findViewById(R.id.add_image_btn);
-        addImgBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                //showSelectPlaceDialog();
-                /*startActivityForResult(new Intent(WeatherActivity.this, CityPickerActivity.class),
-                        REQUEST_CODE_PICK_CITY);*/
-                showCityPicker();
-                dialog.dismiss();
-            }
-        });
-        final ArrayList<String> addedAreaList=new ArrayList<>();
-        final ArrayList<String> addedWeatherIdList=new ArrayList<>();
-        ArrayList<Location> locationList= (ArrayList<Location>) DataSupport.findAll(Location.class);
-        if(locationList.size()>0){
-            for(Location mLocation:locationList){
-                addedAreaList.add(mLocation.getUserLocation());
-            }
-        }
-        //AddedAreaListAdapter mAdapter=new AddedAreaListAdapter(WeatherActivity.this,R.layout.added_area_item,addedAreaList);
-        final ArrayAdapter<String> mAdapter=new ArrayAdapter<String>(WeatherActivity.this,android.R.layout.simple_list_item_1,addedAreaList);
-        placeListView.setAdapter(mAdapter);
-        placeListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                weatherId=addedAreaList.get(i);
-                requestWeather(weatherId);
-                dialog.dismiss();
-            }
-        });
-        placeListView.setOnMenuItemClickListener(new SwipeMenuListView.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(int position, SwipeMenu menu, int index) {
-                switch (index){
-                    case 0:
-                        DataSupport.deleteAll(Location.class,"userlocation=?",addedAreaList.get(position));
-                        addedAreaList.remove(position);
-                        mAdapter.notifyDataSetChanged();
-                        break;
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode){
+            case 1:
+                if(resultCode==RESULT_OK){
+                    String placeName=data.getStringExtra("place_name");
+                    requestWeather(placeName);
                 }
-                return false;
-            }
-        });
-        locTextLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                SharedPreferences prefs=PreferenceManager.getDefaultSharedPreferences(WeatherActivity.this);
-                weatherId=prefs.getString("bdloc",null);
-                requestWeather(weatherId);
-                dialog.dismiss();
-            }
-
-        });
-        dialog.setContentView(view);
-        Window dialogWindow=dialog.getWindow();
-        WindowManager.LayoutParams lp=dialogWindow.getAttributes();
-        lp.height= (int) (ScreenSizeUtil.getScreenHeight(WeatherActivity.this)*0.5);
-        dialogWindow.setAttributes(lp);
-        dialog.show();
-    }
-
-    private void showCityPicker() {
-        CityPicker cityPicker = new CityPicker.Builder(WeatherActivity.this)
-                .textSize(20)
-                .title("地址选择")
-                .backgroundPop(0x000000000)
-                .titleBackgroundColor("#ffffff")
-                .titleTextColor("#000000")
-                .backgroundPop(0xa0000000)
-                .confirTextColor("#000000")
-                .cancelTextColor("#000000")
-                .province("北京")
-                .city("北京市")
-                .district("海淀区")
-                .textColor(Color.parseColor("#000000"))
-                .provinceCyclic(true)
-                .cityCyclic(false)
-                .districtCyclic(false)
-                .visibleItemsCount(7)
-                .itemPadding(10)
-                .onlyShowProvinceAndCity(false)
-                .build();
-        cityPicker.show();
-
-        //监听方法，获取选择结果
-        cityPicker.setOnCityItemClickListener(new CityPicker.OnCityItemClickListener() {
-            @Override
-            public void onSelected(String... citySelected) {
-                String selectCounty = citySelected[2].substring(0,citySelected[2].length()-1);
-                Location location=new Location();
-                location.setUserLocation(selectCounty);
-                SharedPreferences prefs= PreferenceManager.getDefaultSharedPreferences(WeatherActivity.this);
-                String prefsLoc=prefs.getString("bdloc",null);
-                List<Location> locationList=new ArrayList<>();
-                locationList=DataSupport.where("userlocation=?",selectCounty).find(Location.class);
-                //判断添加的地区是否已经在数据库和sharepreference文件中存在，若存在则不重复添加
-                if(locationList.size()<1&&!selectCounty.equals(prefsLoc)){
-                    location.save();
-                }
-                requestWeather(selectCounty);
-            }
-
-            @Override
-            public void onCancel() {
-                Toast.makeText(WeatherActivity.this, "已取消", Toast.LENGTH_LONG).show();
-            }
-        });
+        }
     }
 
     /**
      * 显示生活信息的弹窗
      */
     private void showSugDialog() {
-        View view=LayoutInflater.from(WeatherActivity.this).inflate(R.layout.sug_dialog_layout,null);//加载布局
+        View view=LayoutInflater.from(mContext).inflate(R.layout.sug_dialog_layout,null);//加载布局
         TextView comfortText= (TextView) view.findViewById(R.id.comfort_text);
         TextView carWashText= (TextView) view.findViewById(R.id.car_wash_text);
         TextView sportText= (TextView) view.findViewById(R.id.sport_text);
         if(currentWeather!=null){
-            comfortText.setText(currentWeather.suggestion.comfort.info);
-            carWashText.setText(currentWeather.suggestion.carWash.info);
-            sportText.setText(currentWeather.suggestion.sport.info);
+            /*Suggestion.Comfort mComfort=currentWeather.suggestion.comfort;
+            Suggestion.CarWash mCarwash=currentWeather.suggestion.carWash;
+            Suggestion.Sport mSport=currentWeather.suggestion.sport;*/
+            Suggestion suggestion=currentWeather.suggestion;
+            if(suggestion==null){
+                comfortText.setText("无数据(ㄒoㄒ)~~");
+                carWashText.setText("无数据(ㄒoㄒ)~~");
+                sportText.setText("无数据(ㄒoㄒ)~~");
+            }else{
+                String comfort=currentWeather.suggestion.comfort.info;
+                String carwash=currentWeather.suggestion.carWash.info;
+                String sport=currentWeather.suggestion.sport.info;
+                comfortText.setText(comfort);
+                carWashText.setText(carwash);
+                sportText.setText(sport);
+            }
         }
-        Dialog dialog=new Dialog(WeatherActivity.this,R.style.Translucent_dialog);
+        Dialog dialog=new Dialog(mContext,R.style.Translucent_dialog);
         dialog.setContentView(view);
-       /* Window window=dialog.getWindow();
-        window.setGravity(Gravity.BOTTOM);*/
-        dialog.show();
-        //控制dialog的位置在底部
-       /* Window window=dialog.getWindow();
-        window.getDecorView().setPadding(0,0,0,0);
+        //控制dialog
+        Window window=dialog.getWindow();
         WindowManager.LayoutParams layoutParams=window.getAttributes();
-        layoutParams.width= WindowManager.LayoutParams.MATCH_PARENT;
-        layoutParams.gravity= Gravity.BOTTOM;
-        window.setAttributes(layoutParams);*/
+        layoutParams.width= (int) (ScreenSizeUtil.getScreenWidth(mContext)*0.9);
+        window.setAttributes(layoutParams);
+        dialog.show();
     }
 
     /**
@@ -780,7 +663,7 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
     }
 
     private void startAnim() {
-        Animation opreatAnim= AnimationUtils.loadAnimation(WeatherActivity.this,R.anim.update_rotate_anim);
+        Animation opreatAnim= AnimationUtils.loadAnimation(mContext,R.anim.update_rotate_anim);
         LinearInterpolator interpolator=new LinearInterpolator();
         opreatAnim.setInterpolator(interpolator);
         updateImageBtn.startAnimation(opreatAnim);
@@ -819,7 +702,7 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
                 weatherId=tempCounty;
                 isWait=false;
             }
-            SharedPreferences.Editor editor=PreferenceManager.getDefaultSharedPreferences(WeatherActivity.this).edit();
+            SharedPreferences.Editor editor=PreferenceManager.getDefaultSharedPreferences(mContext).edit();
             editor.putString("bdloc",tempCounty);
             editor.apply();
         }

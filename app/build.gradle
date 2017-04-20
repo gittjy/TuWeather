@@ -50,4 +50,7 @@ dependencies {
     compile 'com.zaaach:citypicker:1.1'//城市选择
 
     compile 'liji.library.dev:citypickerview:1.0.0'//城市选择三级联动
+
+    compile 'cn.pedant.sweetalert:library:1.3' //弹窗控件
+
 }

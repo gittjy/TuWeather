@@ -10,8 +10,6 @@ import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -41,7 +39,6 @@ public class AboutUsActivity extends AppCompatActivity{
         }
         collpasingToolbar.setTitle("关于");
         //aboutText.setText(generateText());
-        Glide.with(this).load(R.mipmap.wallhaven).into(aboutImage);
     }
 
     private String generateText() {
