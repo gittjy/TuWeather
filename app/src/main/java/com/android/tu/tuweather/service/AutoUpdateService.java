@@ -1,15 +1,19 @@
 package com.android.tu.tuweather.service;
 
 import android.app.AlarmManager;
+import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.BitmapFactory;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import com.android.tu.tuweather.R;
 import com.android.tu.tuweather.gson.Weather;
 import com.android.tu.tuweather.util.HttpUtil;
 import com.android.tu.tuweather.util.Utility;
@@ -24,7 +28,8 @@ public class AutoUpdateService extends Service {
 
     private static final String SERVICE_TAG="AUTO_SERVICE";
 
-    private static final int TIME_INTERVAL=60*60*1000;
+    private static final int TIME_INTERVAL=60*1000;
+    private Notification notification;
 
     public AutoUpdateService() {
     }
@@ -45,7 +50,6 @@ public class AutoUpdateService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(SERVICE_TAG,"StartCommand");
         updateWeather();
-        updateBingPic();
         AlarmManager manager= (AlarmManager) getSystemService(ALARM_SERVICE);
         long triggerAtTime= SystemClock.elapsedRealtime()+TIME_INTERVAL;
         Intent i=new Intent(this,AutoUpdateService.class);
@@ -55,13 +59,13 @@ public class AutoUpdateService extends Service {
         return super.onStartCommand(intent, flags, startId);
     }
 
-    private void updateBingPic() {
-        SharedPreferences prefs= PreferenceManager.getDefaultSharedPreferences(this);
-        String weatherString=prefs.getString("weather",null);
-        if(weatherString!=null){
-            final Weather weather= Utility.handleWeatherResponse(weatherString);
-            String weatherId=weather.basic.weatherId;
-            String weatherUrl="https://free-api.heweather.com/v5/weather?city="+weatherId+"&key=1c3dd6a908d1467dbb730e3e6aaffcb6";
+
+
+    private void updateWeather() {
+        SharedPreferences sharedPreferences=PreferenceManager.getDefaultSharedPreferences(AutoUpdateService.this);
+        String userLoc=sharedPreferences.getString("bdloc",null);
+        if(userLoc!=null){
+            String weatherUrl="https://free-api.heweather.com/v5/weather?city="+userLoc+"&key=1c3dd6a908d1467dbb730e3e6aaffcb6";
             HttpUtil.sendOkhttpRequest(weatherUrl, new Callback() {
                 @Override
                 public void onFailure(Call call, IOException e) {
@@ -71,38 +75,33 @@ public class AutoUpdateService extends Service {
                 @Override
                 public void onResponse(Call call, Response response) throws IOException {
                     String responseText=response.body().string();
-                    Weather weatherResponse=Utility.handleWeatherResponse(responseText);
-                    if (weatherResponse!=null&&weather.status.equals("ok")){
+                    if(responseText!=null){
                         SharedPreferences.Editor editor=PreferenceManager.getDefaultSharedPreferences(AutoUpdateService.this).edit();
-                        editor.putString("weather",responseText);
+                        editor.putString("bing_pic",responseText);
                         editor.apply();
-                        Log.d("Service_Result",weatherResponse.basic.update.updateTime);
-                    }
+                        SharedPreferences sharedPreferences=PreferenceManager.getDefaultSharedPreferences(AutoUpdateService.this);
+                        boolean isShowNotify=sharedPreferences.getBoolean("isShowNotify",true);
+                        if(isShowNotify){
+                            Weather weather= Utility.handleWeatherResponse(responseText);
+                            notification = new NotificationCompat.Builder(AutoUpdateService.this)
+                                    .setContentTitle(weather.now.more.info+" "+weather.now.temperature+"℃")
+                                    .setSmallIcon(R.mipmap.ic_app_logo)
+                                    .setLargeIcon(BitmapFactory.decodeResource(getResources(),R.mipmap.ic_app_logo))
+                                    .setContentText(weather.basic.cityName)
+                                    .build();
+                            startForeground(1, notification);
+                        }else{
+                            stopForeground(true);
+                        }
+                        //stopForeground(1);
 
+                    }
                 }
             });
         }
     }
 
-    private void updateWeather() {
-        String bingUrl="http://guolin.tech/api/bing_pic";
-        HttpUtil.sendOkhttpRequest(bingUrl, new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
 
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                String responseText=response.body().string();
-                if(responseText!=null){
-                    SharedPreferences.Editor editor=PreferenceManager.getDefaultSharedPreferences(AutoUpdateService.this).edit();
-                    editor.putString("bing_pic",responseText);
-                    editor.apply();
-                }
-            }
-        });
-    }
 
     @Override
     public void onDestroy() {

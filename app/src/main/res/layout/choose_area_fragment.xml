@@ -3,12 +3,14 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#0000">
+    android:background="@mipmap/place_bg1">
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="@android:color/transparent">
+        android:background="@android:color/transparent"
+        android:layout_marginTop="10dp"
+        android:fitsSystemWindows="true">
 
         <ImageButton
             android:id="@+id/img_back_btn"
@@ -18,7 +20,7 @@
             android:layout_centerVertical="true"
             android:layout_marginLeft="10dp"
             android:background="@android:color/transparent"
-            android:src="@drawable/ic_back_black"
+            android:src="@drawable/ic_back"
             android:scaleType="centerInside"/>
 
         <TextView
@@ -28,7 +30,7 @@
             android:layout_centerInParent="true"
             android:textSize="20sp"
             android:background="@android:color/transparent"
-            android:textColor="@color/colorGrayText"/>
+            android:textColor="@android:color/white"/>
     </RelativeLayout>
 
     <ListView

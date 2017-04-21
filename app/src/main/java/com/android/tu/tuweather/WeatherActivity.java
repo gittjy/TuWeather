@@ -14,7 +14,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -34,8 +33,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.tu.tuweather.fragment.ChooseAreaFragment;
 import com.android.tu.tuweather.gson.Suggestion;
 import com.android.tu.tuweather.gson.Weather;
+import com.android.tu.tuweather.service.AutoUpdateService;
 import com.android.tu.tuweather.util.HttpUtil;
 import com.android.tu.tuweather.util.ScreenSizeUtil;
 import com.android.tu.tuweather.util.Utility;
@@ -148,6 +149,7 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
 
     private int[] imageIds={R.mipmap.bg_1,R.mipmap.bg_2,R.mipmap.bg_3,R.mipmap.bg_4,R.mipmap.bg_5,
             R.mipmap.bg_6,R.mipmap.bg_7,R.mipmap.bg_8};
+
 
 
     @Override
@@ -369,6 +371,13 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
             TextView minText;
             maxTempList.add(Integer.valueOf(weather.forecastList.get(i).temperature.max));
             minTempList.add(Integer.valueOf(weather.forecastList.get(i).temperature.min));
+            String info=weather.forecastList.get(i).more.info;
+            if(info.equals("雷阵雨伴有冰雹")){
+                info="雷阵雨";
+            }
+            if(info.equals("毛毛雨/细雨")){
+                info="毛毛雨";
+            }
             switch (i){
                 case 0:
                     view= LayoutInflater.from(this).inflate(R.layout.forcast_item,forecastLayout1,false);
@@ -377,7 +386,7 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
                     maxText= (TextView) view.findViewById(R.id.max_text);
                     minText=(TextView)view.findViewById(R.id.min_text);
                     dateText.setText("今天");
-                    infoText.setText(weather.forecastList.get(i).more.info);
+                    infoText.setText(info);
                     maxText.setText(weather.forecastList.get(i).temperature.max+"°");
                     minText.setText(weather.forecastList.get(i).temperature.min+"°");
                     forecastLayout1.addView(view);
@@ -389,7 +398,7 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
                     maxText= (TextView) view.findViewById(R.id.max_text);
                     minText=(TextView)view.findViewById(R.id.min_text);
                     dateText.setText(dateStringUtility(weather.forecastList.get(i).date));
-                    infoText.setText(weather.forecastList.get(i).more.info);
+                    infoText.setText(info);
                     maxText.setText(weather.forecastList.get(i).temperature.max+"°");
                     minText.setText(weather.forecastList.get(i).temperature.min+"°");
                     forecastLayout2.addView(view);
@@ -401,7 +410,7 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
                     maxText= (TextView) view.findViewById(R.id.max_text);
                     minText=(TextView)view.findViewById(R.id.min_text);
                     dateText.setText(dateStringUtility(weather.forecastList.get(i).date));
-                    infoText.setText(weather.forecastList.get(i).more.info);
+                    infoText.setText(info);
                     maxText.setText(weather.forecastList.get(i).temperature.max+"°");
                     minText.setText(weather.forecastList.get(i).temperature.min+"°");
                     forecastLayout3.addView(view);
@@ -413,7 +422,7 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
                     maxText= (TextView) view.findViewById(R.id.max_text);
                     minText=(TextView)view.findViewById(R.id.min_text);
                     dateText.setText(dateStringUtility(weather.forecastList.get(i).date));
-                    infoText.setText(weather.forecastList.get(i).more.info);
+                    infoText.setText(info);
                     maxText.setText(weather.forecastList.get(i).temperature.max+"°");
                     minText.setText(weather.forecastList.get(i).temperature.min+"°");
                     forecastLayout4.addView(view);
@@ -425,7 +434,7 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
                     maxText= (TextView) view.findViewById(R.id.max_text);
                     minText=(TextView)view.findViewById(R.id.min_text);
                     dateText.setText(dateStringUtility(weather.forecastList.get(i).date));
-                    infoText.setText(weather.forecastList.get(i).more.info);
+                    infoText.setText(info);
                     maxText.setText(weather.forecastList.get(i).temperature.max+"°");
                     minText.setText(weather.forecastList.get(i).temperature.min+"°");
                     forecastLayout5.addView(view);
@@ -438,7 +447,7 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
                     minText=(TextView)view.findViewById(R.id.min_text);
                     dateStringUtility(weather.forecastList.get(i).date);
                     dateText.setText(dateStringUtility(weather.forecastList.get(i).date));
-                    infoText.setText(weather.forecastList.get(i).more.info);
+                    infoText.setText(info);
                     maxText.setText(weather.forecastList.get(i).temperature.max+"°");
                     minText.setText(weather.forecastList.get(i).temperature.min+"°");
                     forecastLayout6.addView(view);
@@ -450,7 +459,7 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
                     maxText= (TextView) view.findViewById(R.id.max_text);
                     minText=(TextView)view.findViewById(R.id.min_text);
                     dateText.setText(dateStringUtility(weather.forecastList.get(i).date));
-                    infoText.setText(weather.forecastList.get(i).more.info);
+                    infoText.setText(info);
                     maxText.setText(weather.forecastList.get(i).temperature.max+"°");
                     minText.setText(weather.forecastList.get(i).temperature.min+"°");
                     forecastLayout7.addView(view);
@@ -463,6 +472,13 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
         loadFrameLayout.setVisibility(View.GONE);
         mainFrameLayout.setVisibility(View.VISIBLE);
         generateLineChart(maxTempList,minTempList);
+
+        Intent intent = new Intent(mContext, AutoUpdateService.class);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        Boolean isUpdate= prefs.getBoolean("isAutoUpdate",true);
+        if(isUpdate){
+            startService(intent);
+        }
     }
 
     private void updateBackImage() {
@@ -651,16 +667,16 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
     /**
      * 显示地区选择的Dialog
      */
-    private void showSelectPlaceDialog() {
+    /*private void showSelectPlaceDialog() {
         chooseAreaFragment = new ChooseAreaFragment(); //dialogfragment实例
         chooseAreaFragment.setCancelable(true);
         chooseAreaFragment.setStyle(DialogFragment.STYLE_NO_TITLE,R.style.Translucent_white_dialog);
         chooseAreaFragment.show(getSupportFragmentManager(),"tag");
-    }
+    }*/
 
-    public void dismissPlaceDialog(){
+    /*public void dismissPlaceDialog(){
         chooseAreaFragment.dismiss();
-    }
+    }*/
 
     private void startAnim() {
         Animation opreatAnim= AnimationUtils.loadAnimation(mContext,R.anim.update_rotate_anim);

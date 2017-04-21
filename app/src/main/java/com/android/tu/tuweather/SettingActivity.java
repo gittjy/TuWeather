@@ -39,7 +39,7 @@ import es.dmoral.toasty.Toasty;
 /**
  * Created by tjy on 2017/3/14.
  */
-public class SettingActivity extends AppCompatActivity implements View.OnClickListener{
+public class SettingActivity extends AppCompatActivity implements View.OnClickListener,CompoundButton.OnCheckedChangeListener{
 
     public static final String SETTING="Setting_Activity";
 
@@ -48,15 +48,18 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
     @BindView(R.id.set_toolbar)
     Toolbar setToolbar;
     @BindView(R.id.switch_btn)
-    SwitchButton switchBtn;
+    SwitchButton serviceSwitch;
     @BindView(R.id.set_bg_layout)
     RelativeLayout setBgLayout;
     @BindView(R.id.bg_resource_text)
     TextView bgResTextView;
+    @BindView(R.id.notify_switch)
+    SwitchButton notifySwitch;
 
     private Context mContext;
     private SharedPreferences prefs;
     private Dialog bgSetDialog;
+    private Intent intent;
 
 
     @Override
@@ -70,35 +73,20 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
         if(actionBar!=null){
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
+        intent = new Intent(mContext, AutoUpdateService.class);
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        Boolean isUpdate= prefs.getBoolean("isAutoUpdate",false);
-        switchBtn.setChecked(isUpdate);
+        Boolean isUpdate= prefs.getBoolean("isAutoUpdate",true);
+        serviceSwitch.setChecked(isUpdate);
         boolean isAlbum=prefs.getBoolean("isAlbum",false);
         if(isAlbum){
             bgResTextView.setText("相册图片");
         } else {
             bgResTextView.setText("系统图片");
         }
-
-        switchBtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                Intent intent=new Intent(mContext, AutoUpdateService.class);
-                if(b){
-                    startService(intent);
-                    makeSuccessToast("已开启数据自动更新");
-                    SharedPreferences.Editor editor=PreferenceManager.getDefaultSharedPreferences(mContext).edit();
-                    editor.putBoolean("isAutoUpdate",true);
-                    editor.commit();
-                }else{
-                    stopService(intent);
-                    makecloseToast("已关闭数据自动更新");
-                    SharedPreferences.Editor editor=PreferenceManager.getDefaultSharedPreferences(mContext).edit();
-                    editor.putBoolean("isAutoUpdate",false);
-                    editor.commit();
-                }
-            }
-        });
+        Boolean isShowNotify=prefs.getBoolean("isShowNotify",true);
+        notifySwitch.setChecked(isShowNotify);
+        serviceSwitch.setOnCheckedChangeListener(this);
+        notifySwitch.setOnCheckedChangeListener(this);
     }
 
     private void makeSuccessToast(String msg) {
@@ -222,5 +210,43 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
         DisplayMetrics displayMetrics=new DisplayMetrics();
         windowManager.getDefaultDisplay().getMetrics(displayMetrics);
         return displayMetrics.widthPixels;
+    }
+
+    @Override
+    public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+        switch (compoundButton.getId()){
+            case R.id.switch_btn:
+                if(b){
+                    startService(intent);
+                    makeSuccessToast("已开启数据自动更新");
+                    SharedPreferences.Editor editor=PreferenceManager.getDefaultSharedPreferences(mContext).edit();
+                    editor.putBoolean("isAutoUpdate",true);
+                    editor.commit();
+                    notifySwitch.setEnabled(true);
+                }else{
+                    makecloseToast("已关闭数据自动更新");
+                    SharedPreferences.Editor editor=PreferenceManager.getDefaultSharedPreferences(mContext).edit();
+                    editor.putBoolean("isAutoUpdate",false);
+                    editor.commit();
+                    notifySwitch.setChecked(false);
+                    notifySwitch.setEnabled(false);
+                    stopService(intent);
+                }
+                break;
+            case R.id.notify_switch:
+                if(b){
+                    SharedPreferences.Editor editor=PreferenceManager.getDefaultSharedPreferences(mContext).edit();
+                    editor.putBoolean("isShowNotify",true);
+                    editor.commit();
+                }else{
+                    SharedPreferences.Editor editor=PreferenceManager.getDefaultSharedPreferences(mContext).edit();
+                    editor.putBoolean("isShowNotify",false);
+                    editor.commit();
+                }
+                if(serviceSwitch.isChecked()){
+                    startService(intent);
+                }
+                break;
+        }
     }
 }

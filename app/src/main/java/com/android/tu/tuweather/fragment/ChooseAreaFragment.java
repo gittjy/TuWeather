@@ -1,16 +1,18 @@
-package com.android.tu.tuweather;
+package com.android.tu.tuweather.fragment;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
-import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
@@ -18,6 +20,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.tu.tuweather.PlaceSelectActivity;
+import com.android.tu.tuweather.R;
 import com.android.tu.tuweather.adapter.AreaListAdapter;
 import com.android.tu.tuweather.db.City;
 import com.android.tu.tuweather.db.County;
@@ -42,7 +46,7 @@ import okhttp3.Response;
 /**
  * Created by tjy on 2017/2/28.
  */
-public class ChooseAreaFragment extends DialogFragment{
+public class ChooseAreaFragment extends Fragment {
 
     public static final int LEVEL_PROVINCE=0;
 
@@ -77,8 +81,13 @@ public class ChooseAreaFragment extends DialogFragment{
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        getDialog().requestWindowFeature(Window.FEATURE_NO_TITLE);
-        View view=inflater.inflate(R.layout.choose_area,container,false);
+        View view=inflater.inflate(R.layout.choose_area_fragment,container,false);
+        if(Build.VERSION.SDK_INT>=21){
+            View decroView=getActivity().getWindow().getDecorView();
+            decroView.setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN|View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+            getActivity().getWindow().setStatusBarColor(Color.TRANSPARENT);
+        }
         ButterKnife.bind(this,view);
         listAdapter=new AreaListAdapter(getContext(),R.layout.arealist_item,datalist);
         areaList.setAdapter(listAdapter);
@@ -91,6 +100,9 @@ public class ChooseAreaFragment extends DialogFragment{
             queryCity();
         }else if(currentLevel==LEVEL_CITY){
             queryProvince();
+        }else if(currentLevel==LEVEL_PROVINCE){
+            PlaceSelectActivity placeSelectActivity= (PlaceSelectActivity) getActivity();
+            placeSelectActivity.returntoPlaceFragment();
         }
     }
 
@@ -101,7 +113,6 @@ public class ChooseAreaFragment extends DialogFragment{
         getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);//获得屏幕的宽高i
         int mWidth= displayMetrics.widthPixels;
         int mHeight=displayMetrics.heightPixels;
-        getDialog().getWindow().setLayout((int)(0.7*mWidth),(int)( 0.6*mHeight));
     }
 
     @Override
@@ -120,18 +131,24 @@ public class ChooseAreaFragment extends DialogFragment{
                     String selectCounty=countyList.get(i).getCountyName();
                     Location location=new Location();
                     location.setOtherPlace(selectCounty);
+                    location.setProvinceName(selectedProvince.getProvinceName());
                     location.setLocweatherid(countyList.get(i).getWeatherId());
                     SharedPreferences prefs= PreferenceManager.getDefaultSharedPreferences(getActivity());
                     String prefsLoc=prefs.getString("bdloc",null);
                     List<Location> locationList=new ArrayList<>();
-                    locationList=DataSupport.where("userlocation=?",selectCounty).find(Location.class);
+                    locationList=DataSupport.where("otherplace=?",selectCounty).find(Location.class);
                     //判断添加的地区是否已经在数据库和sharepreference文件中存在，若存在则不重复添加
                     if(locationList.size()<1&&!selectCounty.equals(prefsLoc)){
                         location.save();
                     }
-                    WeatherActivity weatherActivity= (WeatherActivity) getActivity();
-                    weatherActivity.requestWeather(countyList.get(i).getWeatherId());
-                    weatherActivity.dismissPlaceDialog();
+                    Intent intent=new Intent();
+                    intent.putExtra("place_name",selectCounty);
+                    PlaceSelectActivity placeSelectActivity= (PlaceSelectActivity) getActivity();
+                    placeSelectActivity.setResult(placeSelectActivity.RESULT_OK,intent);
+                    placeSelectActivity.finish();
+                    if(Build.VERSION.SDK_INT<23){
+                        placeSelectActivity.overridePendingTransition(R.anim.in_left,R.anim.out_right);
+                    }
                 }
             }
         });
@@ -140,7 +157,7 @@ public class ChooseAreaFragment extends DialogFragment{
 
     private void queryProvince() {
         titleText.setText("中国");
-        backBtn.setVisibility(View.GONE);
+        backBtn.setVisibility(View.VISIBLE);
         provinceList= DataSupport.findAll(Province.class);
         if(provinceList.size()>0){
             datalist.clear();

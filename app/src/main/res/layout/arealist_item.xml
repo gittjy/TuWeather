@@ -8,11 +8,11 @@
         android:id="@+id/area_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"
-        android:layout_marginLeft="20dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="20dp"
+        android:layout_marginLeft="50dp"
         android:background="@android:color/transparent"
-        android:textColor="@color/colorGrayText"
+        android:textColor="@android:color/white"
         android:textSize="15sp" />
 
 </LinearLayout>

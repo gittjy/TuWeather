@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@mipmap/place_bg"
+    android:fitsSystemWindows="true">
+
+    <com.android.tu.topbarlibrary.NormalTopBar
+        android:id="@+id/place_fragment_title"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@android:color/transparent"
+        app:leftImageSrc="@drawable/ic_back"
+        app:top_titleText="地区选择"
+        app:top_titleTextColor="@android:color/white"
+        android:padding="10dp"/>
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/place_select_recycle"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    </android.support.v7.widget.RecyclerView>
+
+</LinearLayout>
