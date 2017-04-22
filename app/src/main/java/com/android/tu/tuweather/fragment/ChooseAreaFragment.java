@@ -39,6 +39,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import cn.pedant.SweetAlert.SweetAlertDialog;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
@@ -77,6 +78,7 @@ public class ChooseAreaFragment extends Fragment {
     private Province selectedProvince;
 
     private City selectedCity;
+    private SweetAlertDialog progressSweetDialog;
 
     @Nullable
     @Override
@@ -129,6 +131,7 @@ public class ChooseAreaFragment extends Fragment {
                     queryCounty();
                 }else if(currentLevel==LEVEL_COUNTY){
                     String selectCounty=countyList.get(i).getCountyName();
+                    String selectWeatherId=countyList.get(i).getWeatherId();
                     Location location=new Location();
                     location.setOtherPlace(selectCounty);
                     location.setProvinceName(selectedProvince.getProvinceName());
@@ -142,7 +145,7 @@ public class ChooseAreaFragment extends Fragment {
                         location.save();
                     }
                     Intent intent=new Intent();
-                    intent.putExtra("place_name",selectCounty);
+                    intent.putExtra("weather_id",selectWeatherId);
                     PlaceSelectActivity placeSelectActivity= (PlaceSelectActivity) getActivity();
                     placeSelectActivity.setResult(placeSelectActivity.RESULT_OK,intent);
                     placeSelectActivity.finish();
@@ -261,17 +264,17 @@ public class ChooseAreaFragment extends Fragment {
 
     private void showProgressDialog() {
 
-        if(progressDialog==null){
-            progressDialog=new ProgressDialog(getActivity());
-            progressDialog.setTitle("加载中...");
-            progressDialog.setCanceledOnTouchOutside(false);
+        if(progressSweetDialog==null){
+            progressSweetDialog = new SweetAlertDialog(getContext(),SweetAlertDialog.PROGRESS_TYPE)
+                    .setTitleText("加载中...")
+                    .showContentText(false);
         }
-        progressDialog.show();
+        progressSweetDialog.show();
     }
 
     private void closeProgressDialog() {
-        if(progressDialog!=null){
-            progressDialog.dismiss();
+        if(progressSweetDialog!=null){
+            progressSweetDialog.dismiss();
         }
     }
 }

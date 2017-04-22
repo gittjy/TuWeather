@@ -7,11 +7,15 @@ public class PlaceItem {
 
     private String placeName;
 
-    private String placeWeather;
+    private String placeProvince;
 
-    public PlaceItem(String name,String weather){
+
+    private String placeWeatherId;
+
+    public PlaceItem(String name,String province,String weatherid){
         this.placeName=name;
-        this.placeWeather=weather;
+        this.placeProvince =province;
+        this.placeWeatherId=weatherid;
     }
 
     public String getPlaceName() {
@@ -22,11 +26,19 @@ public class PlaceItem {
         this.placeName = placeName;
     }
 
-    public String getPlaceWeather() {
-        return placeWeather;
+    public String getPlaceProvince() {
+        return placeProvince;
     }
 
-    public void setPlaceWeather(String placeWeather) {
-        this.placeWeather = placeWeather;
+    public void setPlaceProvince(String placeProvince) {
+        this.placeProvince = placeProvince;
+    }
+
+    public String getPlaceWeatherId() {
+        return placeWeatherId;
+    }
+
+    public void setPlaceWeatherId(String placeWeatherId) {
+        this.placeWeatherId = placeWeatherId;
     }
 }

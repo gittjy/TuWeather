@@ -622,7 +622,7 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
         switch (requestCode){
             case 1:
                 if(resultCode==RESULT_OK){
-                    String placeName=data.getStringExtra("place_name");
+                    String placeName=data.getStringExtra("weather_id");
                     requestWeather(placeName);
                 }
         }
@@ -710,6 +710,7 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
             //progressDialog.dismiss();
 
             isLocatedFlag=true;
+            bdLocation.getLatitude();
             String county=bdLocation.getDistrict();
             String tempCounty=county.substring(0,county.length()-1);
             //List<County> mCounty=DataSupport.where("countyname=?",tempCounty).find(County.class);

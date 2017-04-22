@@ -110,7 +110,7 @@ public class PlaceGridAdapter extends RecyclerView.Adapter<PlaceGridAdapter.View
             }
             PlaceItem placeItem=placeItemList.get(position);
             holder.placeName.setText(placeItem.getPlaceName());
-            holder.placeWeather.setText(placeItem.getPlaceWeather());
+            holder.placeWeather.setText(placeItem.getPlaceProvince());
             holder.placeInfoLinear.setVisibility(View.VISIBLE);
             holder.imageLinear.setVisibility(View.GONE);
         }else{
